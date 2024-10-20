@@ -1,0 +1,55 @@
+plugins {
+    id 'com.gradleup.shadow' version '8.3.0'
+}
+
+tasks.withType(JavaCompile) {
+    // override, compile targeting J21
+    options.release = 21
+}
+
+dependencies {
+    implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
+    compileOnly 'org.allaymc.allay:api:master-SNAPSHOT'
+}
+
+repositories {
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://repo.opencollab.dev/maven-releases/' }
+    maven { url 'https://repo.opencollab.dev/maven-snapshots/' }
+    maven { url 'https://storehouse.okaeri.eu/repository/maven-public/' }
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        expand (
+                'pluginVersion': project.pluginVersion,
+                'pluginDescription': project.pluginDescription
+        )
+        include 'plugin.json'
+    }
+}
+
+shadowJar {
+    archiveFileName = "spark-${project.pluginVersion}-allay.jar"
+
+    relocate 'net.kyori.adventure', 'me.lucko.spark.lib.adventure'
+    relocate 'net.kyori.examination', 'me.lucko.spark.lib.adventure.examination'
+    relocate 'net.kyori.option', 'me.lucko.spark.lib.adventure.option'
+    relocate 'net.bytebuddy', 'me.lucko.spark.lib.bytebuddy'
+    relocate 'com.google.protobuf', 'me.lucko.spark.lib.protobuf'
+    relocate 'org.objectweb.asm', 'me.lucko.spark.lib.asm'
+    relocate 'one.profiler', 'me.lucko.spark.lib.asyncprofiler'
+    relocate 'me.lucko.bytesocks.client', 'me.lucko.spark.lib.bytesocks'
+    relocate 'org.java_websocket', 'me.lucko.spark.lib.bytesocks.ws'
+
+    exclude 'module-info.class'
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/proguard/**'
+    exclude '**/*.proto'
+    exclude '**/*.proto.bin'
+}
+
+artifacts {
+    archives shadowJar
+    shadow shadowJar
+}
