@@ -1,0 +1,53 @@
+plugins {
+    id 'com.gradleup.shadow' version '8.3.0'
+}
+
+tasks.withType(JavaCompile) {
+    // override, compile targeting J21
+    options.release = 21
+}
+
+dependencies {
+    implementation 'me.lucko:spark-common:1.10.110-SNAPSHOT'
+
+    compileOnly 'net.minestom:minestom-snapshots:0ca1dda2fe'
+    compileOnly 'dev.hollowcube:minestom-ce-extensions:1.2.0'
+    implementation 'com.google.guava:guava:19.0'
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        expand (
+                'pluginVersion': project.pluginVersion,
+                'pluginDescription': project.pluginDescription
+        )
+        include 'extension.json'
+    }
+}
+
+shadowJar {
+    archiveFileName = "spark-${project.pluginVersion}-minestom.jar"
+
+    dependencies {
+        exclude(dependency('net.kyori:^(?!adventure-text-feature-pagination).+$'))
+    }
+
+    relocate 'net.kyori.adventure.text.feature.pagination', 'me.lucko.spark.lib.adventure.pagination'
+    relocate 'net.bytebuddy', 'me.lucko.spark.lib.bytebuddy'
+    relocate 'com.google.protobuf', 'me.lucko.spark.lib.protobuf'
+    relocate 'org.objectweb.asm', 'me.lucko.spark.lib.asm'
+    relocate 'one.profiler', 'me.lucko.spark.lib.asyncprofiler'
+    relocate 'me.lucko.bytesocks.client', 'me.lucko.spark.lib.bytesocks'
+    relocate 'org.java_websocket', 'me.lucko.spark.lib.bytesocks.ws'
+
+    exclude 'module-info.class'
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/proguard/**'
+    exclude '**/*.proto'
+    exclude '**/*.proto.bin'
+}
+
+artifacts {
+    archives shadowJar
+    shadow shadowJar
+}

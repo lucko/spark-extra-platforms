@@ -1,0 +1,18 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
+rootProject.name = 'spark'
+include (
+        'spark-velocity4',
+        'spark-sponge7',
+        'spark-nukkit',
+        'spark-waterdog',
+        'spark-minestom',
+)
