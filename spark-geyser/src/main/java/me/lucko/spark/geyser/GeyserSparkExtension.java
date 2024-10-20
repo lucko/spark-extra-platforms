@@ -25,7 +25,6 @@ import me.lucko.spark.common.SparkPlugin;
 import me.lucko.spark.common.monitor.ping.PlayerPingProvider;
 import me.lucko.spark.common.platform.PlatformInfo;
 import me.lucko.spark.common.sampler.source.ClassSourceLookup;
-
 import me.lucko.spark.common.sampler.source.SourceMetadata;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.event.subscribe.Subscribe;

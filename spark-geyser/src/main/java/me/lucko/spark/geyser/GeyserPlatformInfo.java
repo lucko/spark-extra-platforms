@@ -21,7 +21,6 @@
 package me.lucko.spark.geyser;
 
 import me.lucko.spark.common.platform.PlatformInfo;
-
 import org.geysermc.api.util.ApiVersion;
 import org.geysermc.geyser.api.GeyserApi;
 

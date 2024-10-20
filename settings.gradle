@@ -10,6 +10,7 @@ plugins {
 
 rootProject.name = 'spark'
 include (
+        'spark-folia',
         'spark-geyser',
         'spark-minestom',
         'spark-nukkit',
