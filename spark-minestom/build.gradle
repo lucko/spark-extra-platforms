@@ -8,7 +8,7 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    implementation 'me.lucko:spark-common:1.10.110-SNAPSHOT'
+    implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
 
     compileOnly 'net.minestom:minestom-snapshots:0ca1dda2fe'
     compileOnly 'dev.hollowcube:minestom-ce-extensions:1.2.0'

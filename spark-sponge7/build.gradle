@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation 'me.lucko:spark-common:1.10.110-SNAPSHOT'
+    implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
     compileOnly 'org.spongepowered:spongeapi:7.3.0'
     annotationProcessor 'org.spongepowered:spongeapi:7.3.0'
 }
