@@ -3,12 +3,12 @@ name: Build Gradle
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
     tags:
       - 'v*'
   pull_request:
     branches:
-      - 'master'
+      - 'main'
 
 env:
   REGISTRY: ghcr.io
@@ -16,12 +16,7 @@ env:
 
 jobs:
   build-gradle:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
-    runs-on: ${{ matrix.os }}
-
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -40,12 +35,11 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Run build and tests with Gradle wrapper
-        run: ./gradlew test build
+      - name: Run build with Gradle wrapper
+        run: ./gradlew build
 
       - name: Upload all artifacts
         uses: actions/upload-artifact@v4
-        if: matrix.os == 'ubuntu-latest'
         with:
           name: jars
           path: |
