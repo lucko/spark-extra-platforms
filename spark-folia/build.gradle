@@ -45,7 +45,7 @@ tasks {
 }
 
 shadowJar {
-    archiveFileName = "spark-${project.pluginVersion}-bukkit.jar"
+    archiveFileName = "spark-${project.pluginVersion}-folia.jar"
 
     relocate 'net.kyori.adventure', 'me.lucko.spark.lib.adventure'
     relocate 'net.kyori.examination', 'me.lucko.spark.lib.adventure.examination'
