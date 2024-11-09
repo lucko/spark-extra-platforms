@@ -56,6 +56,6 @@ public class AllayCommandSender extends AbstractCommandSender<CommandSender> {
 
     @Override
     public boolean hasPermission(String permission) {
-        return this.delegate.hasPerm(permission);
+        return this.delegate.hasPermission(permission);
     }
 }
