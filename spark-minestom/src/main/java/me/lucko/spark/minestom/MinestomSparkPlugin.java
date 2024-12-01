@@ -102,14 +102,23 @@ public class MinestomSparkPlugin extends Extension implements SparkPlugin {
 
     @Override
     public void log(Level level, String msg) {
-        if (level == Level.INFO) {
-            this.getLogger().info(msg);
-        } else if (level == Level.WARNING) {
-            this.getLogger().warn(msg);
-        } else if (level == Level.SEVERE) {
+        if (level.intValue() >= 1000) { // severe
             this.getLogger().error(msg);
+        } else if (level.intValue() >= 900) { // warning
+            this.getLogger().warn(msg);
         } else {
-            throw new IllegalArgumentException(level.getName());
+            this.getLogger().info(msg);
+        }
+    }
+
+    @Override
+    public void log(Level level, String msg, Throwable throwable) {
+        if (level.intValue() >= 1000) { // severe
+            this.getLogger().error(msg, throwable);
+        } else if (level.intValue() >= 900) { // warning
+            this.getLogger().warn(msg, throwable);
+        } else {
+            this.getLogger().info(msg, throwable);
         }
     }
 

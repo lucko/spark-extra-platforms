@@ -44,9 +44,7 @@ shadowJar {
     relocate 'me.lucko.bytesocks.client', 'me.lucko.spark.lib.bytesocks'
     relocate 'org.java_websocket', 'me.lucko.spark.lib.bytesocks.ws'
 
-    exclude 'module-info.class'
-    exclude 'META-INF/maven/**'
-    exclude 'META-INF/proguard/**'
+    project.applyExcludes(delegate)
 }
 
 artifacts {

@@ -17,9 +17,24 @@ subprojects {
     apply plugin: 'org.cadixdev.licenser'
 
     ext {
-        baseVersion = '1.10.110'
+        baseVersion = '1.10.119'
         pluginVersion = baseVersion + '-SNAPSHOT'
         pluginDescription = 'spark is a performance profiling plugin/mod for Minecraft clients, servers and proxies.'
+
+        applyExcludes = { Jar jarTask ->
+            jarTask.exclude 'module-info.class'
+            jarTask.exclude 'META-INF/maven/**'
+            jarTask.exclude 'META-INF/proguard/**'
+            jarTask.exclude 'META-INF/LICENSE'
+            jarTask.exclude 'META-INF/NOTICE'
+            // protobuf
+            jarTask.exclude '**/*.proto'
+            jarTask.exclude '**/*.proto.bin'
+            // async-profiler
+            jarTask.exclude 'linux-arm64/**'
+            jarTask.exclude 'linux-x64/**'
+            jarTask.exclude 'macos/**'
+        }
     }
 
     tasks.withType(JavaCompile).configureEach {
