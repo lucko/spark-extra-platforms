@@ -17,4 +17,5 @@ include (
         'spark-sponge7',
         'spark-velocity4',
         'spark-waterdog',
+        'spark-allay'
 )
