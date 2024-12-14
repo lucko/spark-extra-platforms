@@ -44,8 +44,10 @@ public class AllayCommandSender extends AbstractCommandSender<CommandSender> {
 
     @Override
     public UUID getUniqueId() {
-        if (this.delegate instanceof EntityPlayer player)
+        if (this.delegate instanceof EntityPlayer player) {
             return player.getUUID();
+        }
+
         return null;
     }
 

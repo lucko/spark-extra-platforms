@@ -23,6 +23,7 @@ package me.lucko.spark.allay;
 import me.lucko.spark.common.monitor.ping.PlayerPingProvider;
 import org.allaymc.api.server.Server;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +44,6 @@ public class AllayPlayerPingProvider implements PlayerPingProvider {
         for (var player : this.server.getOnlinePlayers().values()) {
             result.put(player.getCommandSenderName(), player.getPing());
         }
-        return result;
+        return Collections.unmodifiableMap(result);
     }
 }

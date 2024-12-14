@@ -42,7 +42,10 @@ public class AllayClassSourceLookup extends ClassSourceLookup.ByFirstUrlSource {
 
     @Override
     public String identify(ClassLoader loader) {
-        if (!this.classLoaders2PluginName.containsKey(loader)) return null;
+        if (!this.classLoaders2PluginName.containsKey(loader)) {
+            return null;
+        }
+
         return this.classLoaders2PluginName.get(loader);
     }
 }

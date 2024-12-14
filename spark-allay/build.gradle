@@ -21,7 +21,7 @@ repositories {
 
 processResources {
     from(sourceSets.main.resources.srcDirs) {
-        expand (
+        expand(
                 'pluginVersion': project.pluginVersion,
                 'pluginDescription': project.pluginDescription
         )

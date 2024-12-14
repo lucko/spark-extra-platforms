@@ -23,15 +23,12 @@ package me.lucko.spark.allay;
 import me.lucko.spark.common.platform.world.AbstractChunkInfo;
 import me.lucko.spark.common.platform.world.CountMap;
 import me.lucko.spark.common.platform.world.WorldInfoProvider;
+import org.allaymc.api.registry.Registries;
 import org.allaymc.api.server.Server;
 import org.allaymc.api.utils.Identifier;
-import org.allaymc.api.world.DimensionInfo;
-import org.allaymc.api.world.World;
 import org.allaymc.api.world.chunk.Chunk;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author IWareQ
@@ -41,10 +38,9 @@ public class AllayWorldInfoProvider implements WorldInfoProvider {
     @Override
     public CountsResult pollCounts() {
         var server = Server.getInstance();
-        int players = server.getOnlinePlayers().size();
-        int entities = 0;
+        var entities = 0;
         var blockEntities = 0;
-        int chunks = 0;
+        var chunks = 0;
 
         for (var world : server.getWorldPool().getWorlds().values()) {
             for (var dimension : world.getDimensions().values()) {
@@ -57,7 +53,7 @@ public class AllayWorldInfoProvider implements WorldInfoProvider {
             }
         }
 
-        return new CountsResult(players, entities, blockEntities, chunks);
+        return new CountsResult(server.getOnlinePlayers().size(), entities, blockEntities, chunks);
     }
 
     @Override
@@ -69,7 +65,7 @@ public class AllayWorldInfoProvider implements WorldInfoProvider {
                 var chunks = dimension.getChunkService().getLoadedChunks();
                 var chunkInfos = chunks.stream().map(AllayChunkInfo::new).toList();
 
-                result.put(world.getWorldData().getName() + "_" + getDimensionName(dimension.getDimensionInfo()), chunkInfos);
+                result.put(world.getWorldData().getDisplayName() + "_" + dimension.getDimensionInfo(), chunkInfos);
             }
         }
 
@@ -79,10 +75,10 @@ public class AllayWorldInfoProvider implements WorldInfoProvider {
     @Override
     public GameRulesResult pollGameRules() {
         GameRulesResult data = new GameRulesResult();
-        for (World world : Server.getInstance().getWorldPool().getWorlds().values()) {
+        for (var world : Server.getInstance().getWorldPool().getWorlds().values()) {
             for (var gameRuleEntry : world.getWorldData().getGameRules().getGameRules().entrySet()) {
-                Object value = gameRuleEntry.getValue();
-                data.put(gameRuleEntry.getKey().getName(), world.getWorldData().getName(), Objects.toString(value));
+                var value = gameRuleEntry.getValue();
+                data.put(gameRuleEntry.getKey().getName(), world.getWorldData().getDisplayName(), Objects.toString(value));
             }
         }
 
@@ -91,16 +87,11 @@ public class AllayWorldInfoProvider implements WorldInfoProvider {
 
     @Override
     public Collection<DataPackInfo> pollDataPacks() {
-        return null;
-    }
-
-    private String getDimensionName(DimensionInfo dimensionInfo) {
-        return switch (dimensionInfo.dimensionId()) {
-            case 0 -> "overworld";
-            case 1 -> "the_nether";
-            case 2 -> "the_end";
-            default -> dimensionInfo.dimensionId() + "";
-        };
+        List<DataPackInfo> dataPacks = new ArrayList<>();
+        Registries.PACKS.getContent().values().forEach(pack -> {
+            dataPacks.add(new DataPackInfo(pack.getName(), pack.getManifest().getHeader().getDescription(), ""));
+        });
+        return dataPacks;
     }
 
     public static class AllayChunkInfo extends AbstractChunkInfo<Identifier> {
