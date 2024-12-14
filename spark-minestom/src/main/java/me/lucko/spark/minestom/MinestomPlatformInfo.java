@@ -21,9 +21,7 @@
 package me.lucko.spark.minestom;
 
 import me.lucko.spark.common.platform.PlatformInfo;
-
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.thread.MinestomThread;
 
 public class MinestomPlatformInfo implements PlatformInfo {
     @Override

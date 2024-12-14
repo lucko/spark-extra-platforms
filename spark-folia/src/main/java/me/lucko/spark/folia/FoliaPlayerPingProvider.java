@@ -18,29 +18,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package me.lucko.spark.minestom;
+package me.lucko.spark.folia;
 
-import me.lucko.spark.common.tick.AbstractTickHook;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.timer.Task;
-import net.minestom.server.timer.TaskSchedule;
+import com.google.common.collect.ImmutableMap;
+import me.lucko.spark.common.monitor.ping.PlayerPingProvider;
+import org.bukkit.Server;
+import org.bukkit.entity.Player;
 
-public class MinestomTickHook extends AbstractTickHook {
-    private Task task;
+import java.util.Map;
 
-    @Override
-    public void start() {
-        this.task = MinecraftServer.getSchedulerManager()
-                .buildTask(this::onTick)
-                .delay(TaskSchedule.tick(1))
-                .repeat(TaskSchedule.tick(1))
-                .schedule();
+public class FoliaPlayerPingProvider implements PlayerPingProvider {
+
+    private final Server server;
+
+    public FoliaPlayerPingProvider(Server server) {
+        this.server = server;
     }
 
     @Override
-    public void close() {
-        if (this.task != null) {
-            this.task.cancel();
+    public Map<String, Integer> poll() {
+        ImmutableMap.Builder<String, Integer> builder = ImmutableMap.builder();
+        for (Player player : this.server.getOnlinePlayers()) {
+            builder.put(player.getName(), player.getPing());
         }
+        return builder.build();
     }
 }

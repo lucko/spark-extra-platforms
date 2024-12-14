@@ -21,7 +21,6 @@
 package me.lucko.spark.geyser;
 
 import me.lucko.spark.common.sampler.source.ClassSourceLookup;
-
 import org.geysermc.geyser.extension.GeyserExtensionClassLoader;
 
 import java.io.IOException;

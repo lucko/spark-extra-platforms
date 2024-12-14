@@ -28,7 +28,6 @@ import me.lucko.spark.common.sampler.source.ClassSourceLookup;
 import me.lucko.spark.common.sampler.source.SourceMetadata;
 import me.lucko.spark.common.tick.TickHook;
 import me.lucko.spark.common.tick.TickReporter;
-
 import me.lucko.spark.common.util.SparkThreadFactory;
 import net.hollowcube.minestom.extensions.ExtensionBootstrap;
 import net.minestom.server.MinecraftServer;
@@ -42,8 +41,6 @@ import net.minestom.server.command.builder.suggestion.Suggestion;
 import net.minestom.server.command.builder.suggestion.SuggestionCallback;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.extensions.Extension;
-import net.minestom.server.timer.ExecutionType;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -105,14 +102,23 @@ public class MinestomSparkPlugin extends Extension implements SparkPlugin {
 
     @Override
     public void log(Level level, String msg) {
-        if (level == Level.INFO) {
-            this.getLogger().info(msg);
-        } else if (level == Level.WARNING) {
-            this.getLogger().warn(msg);
-        } else if (level == Level.SEVERE) {
+        if (level.intValue() >= 1000) { // severe
             this.getLogger().error(msg);
+        } else if (level.intValue() >= 900) { // warning
+            this.getLogger().warn(msg);
         } else {
-            throw new IllegalArgumentException(level.getName());
+            this.getLogger().info(msg);
+        }
+    }
+
+    @Override
+    public void log(Level level, String msg, Throwable throwable) {
+        if (level.intValue() >= 1000) { // severe
+            this.getLogger().error(msg, throwable);
+        } else if (level.intValue() >= 900) { // warning
+            this.getLogger().warn(msg, throwable);
+        } else {
+            this.getLogger().info(msg, throwable);
         }
     }
 

@@ -30,11 +30,8 @@ import me.lucko.spark.common.SparkPlugin;
 import me.lucko.spark.common.monitor.ping.PlayerPingProvider;
 import me.lucko.spark.common.platform.PlatformInfo;
 import me.lucko.spark.common.sampler.source.ClassSourceLookup;
-import me.lucko.spark.common.util.SparkThreadFactory;
 
 import java.nio.file.Path;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
@@ -88,14 +85,23 @@ public class NukkitSparkPlugin extends PluginBase implements SparkPlugin {
 
     @Override
     public void log(Level level, String msg) {
-        if (level == Level.INFO) {
-            getLogger().info(msg);
-        } else if (level == Level.WARNING) {
-            getLogger().warning(msg);
-        } else if (level == Level.SEVERE) {
+        if (level.intValue() >= 1000) { // severe
             getLogger().error(msg);
+        } else if (level.intValue() >= 900) { // warning
+            getLogger().warning(msg);
         } else {
-            throw new IllegalArgumentException(level.getName());
+            getLogger().info(msg);
+        }
+    }
+
+    @Override
+    public void log(Level level, String msg, Throwable throwable) {
+        if (level.intValue() >= 1000) { // severe
+            getLogger().error(msg, throwable);
+        } else if (level.intValue() >= 900) { // warning
+            getLogger().warning(msg, throwable);
+        } else {
+            getLogger().info(msg, throwable);
         }
     }
 

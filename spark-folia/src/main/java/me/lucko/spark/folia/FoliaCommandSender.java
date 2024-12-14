@@ -18,50 +18,45 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package me.lucko.spark.minestom;
+package me.lucko.spark.folia;
 
 import me.lucko.spark.common.command.sender.AbstractCommandSender;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.command.CommandSender;
-import net.minestom.server.command.ConsoleSender;
-import net.minestom.server.entity.Player;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class MinestomCommandSender extends AbstractCommandSender<CommandSender> {
-    public MinestomCommandSender(CommandSender delegate) {
-        super(delegate);
+public class FoliaCommandSender extends AbstractCommandSender<CommandSender> {
+    private final Audience audience;
+
+    public FoliaCommandSender(CommandSender sender, BukkitAudiences audienceFactory) {
+        super(sender);
+        this.audience = audienceFactory.sender(sender);
     }
 
     @Override
     public String getName() {
-        if (this.delegate instanceof Player player) {
-            return player.getUsername();
-        } else if (this.delegate instanceof ConsoleSender) {
-            return "Console";
-         }else {
-            return "unknown:" + this.delegate.getClass().getSimpleName();
-        }
+        return this.delegate.getName();
     }
 
     @Override
     public UUID getUniqueId() {
-        if (super.delegate instanceof Player player) {
-            return player.getUuid();
+        if (super.delegate instanceof Player) {
+            return ((Player) super.delegate).getUniqueId();
         }
         return null;
     }
 
     @Override
     public void sendMessage(Component message) {
-        this.delegate.sendMessage(message);
+        this.audience.sendMessage(message);
     }
 
     @Override
     public boolean hasPermission(String permission) {
-        if (this.delegate instanceof ConsoleSender) {
-            return true;
-        }
-        return this.delegate.hasPermission(permission);
+        return super.delegate.hasPermission(permission);
     }
 }

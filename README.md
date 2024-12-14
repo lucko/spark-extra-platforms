@@ -13,6 +13,7 @@ These releases do not receive the same level of support as the main spark plugin
 #### Useful Links
 * [**Website**](https://spark.lucko.me/) - browse the project homepage
 * [**Documentation**](https://spark.lucko.me/docs) - read documentation and usage guides
+* [**Downloads**](https://ci.lucko.me/job/spark-extra-platforms/) - latest plugin/mod downloads
 
 ## License
 
