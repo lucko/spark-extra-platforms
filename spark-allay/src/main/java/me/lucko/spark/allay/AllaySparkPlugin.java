@@ -97,9 +97,11 @@ public class AllaySparkPlugin extends Plugin implements SparkPlugin {
         this.log(level, msg, null);
     }
 
+    /**
+     * @see <a href="https://stackoverflow.com/questions/20795373/how-to-map-levels-of-java-util-logging-and-slf4j-logger">java.util.logging -> slf4j</a>
+     */
     @Override
     public void log(Level level, String msg, Throwable throwable) {
-        // https://stackoverflow.com/questions/20795373/how-to-map-levels-of-java-util-logging-and-slf4j-logger
         var slf4jLevel = switch (level.getName()) {
             case "ALL", "FINEST" -> org.slf4j.event.Level.TRACE;
             case "FINER", "FINE" -> org.slf4j.event.Level.DEBUG;
