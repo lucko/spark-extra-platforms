@@ -30,7 +30,6 @@ import org.allaymc.api.command.tree.CommandTree;
  * @author IWareQ
  */
 public class AllaySparkCommand extends SimpleCommand {
-
     private final SparkPlatform platform;
 
     public AllaySparkCommand(SparkPlatform platform) {

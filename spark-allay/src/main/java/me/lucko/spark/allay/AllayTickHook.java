@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author IWareQ
  */
 public class AllayTickHook extends AbstractTickHook implements TickHook, Task {
-
     private final AtomicBoolean isEnabled = new AtomicBoolean(true);
 
     private final AllaySparkPlugin plugin;

@@ -42,7 +42,6 @@ import java.util.stream.Stream;
  * @author IWareQ
  */
 public class AllaySparkPlugin extends Plugin implements SparkPlugin {
-
     private SparkPlatform platform;
 
     @Override
@@ -77,7 +76,7 @@ public class AllaySparkPlugin extends Plugin implements SparkPlugin {
     public Stream<AllayCommandSender> getCommandSenders() {
         var server = Server.getInstance();
         return Stream.concat(
-                server.getOnlinePlayers().values().stream(),
+                server.getPlayerService().getPlayers().values().stream(),
                 Stream.of(server)
         ).map(AllayCommandSender::new);
     }
@@ -112,9 +111,9 @@ public class AllaySparkPlugin extends Plugin implements SparkPlugin {
 
         var slf4jLogger = pluginLogger.atLevel(slf4jLevel);
         if (throwable != null) {
-            slf4jLogger.log(msg);
-        } else {
             slf4jLogger.log(msg, throwable);
+        } else {
+            slf4jLogger.log(msg);
         }
     }
 

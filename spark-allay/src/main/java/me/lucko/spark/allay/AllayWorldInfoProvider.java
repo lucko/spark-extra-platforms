@@ -27,6 +27,7 @@ import org.allaymc.api.registry.Registries;
 import org.allaymc.api.server.Server;
 import org.allaymc.api.utils.Identifier;
 import org.allaymc.api.world.chunk.Chunk;
+import org.allaymc.api.world.service.EntityService;
 
 import java.util.*;
 
@@ -34,7 +35,6 @@ import java.util.*;
  * @author IWareQ
  */
 public class AllayWorldInfoProvider implements WorldInfoProvider {
-
     @Override
     public CountsResult pollCounts() {
         var server = Server.getInstance();
@@ -53,7 +53,7 @@ public class AllayWorldInfoProvider implements WorldInfoProvider {
             }
         }
 
-        return new CountsResult(server.getOnlinePlayers().size(), entities, blockEntities, chunks);
+        return new CountsResult(server.getPlayerService().getPlayers().size(), entities, blockEntities, chunks);
     }
 
     @Override
@@ -62,8 +62,9 @@ public class AllayWorldInfoProvider implements WorldInfoProvider {
 
         for (var world : Server.getInstance().getWorldPool().getWorlds().values()) {
             for (var dimension : world.getDimensions().values()) {
+                var entityService = dimension.getEntityService();
                 var chunks = dimension.getChunkService().getLoadedChunks();
-                var chunkInfos = chunks.stream().map(AllayChunkInfo::new).toList();
+                var chunkInfos = chunks.stream().map(chunk -> new AllayChunkInfo(chunk, entityService)).toList();
 
                 result.put(world.getWorldData().getDisplayName() + "_" + dimension.getDimensionInfo(), chunkInfos);
             }
@@ -97,9 +98,11 @@ public class AllayWorldInfoProvider implements WorldInfoProvider {
     public static class AllayChunkInfo extends AbstractChunkInfo<Identifier> {
         private final CountMap<Identifier> entityCounts = new CountMap.Simple<>(new HashMap<>());
 
-        protected AllayChunkInfo(Chunk chunk) {
+        protected AllayChunkInfo(Chunk chunk, EntityService entityService) {
             super(chunk.getX(), chunk.getZ());
-            chunk.getEntities().values().forEach(entity -> this.entityCounts.increment(entity.getEntityType().getIdentifier()));
+            entityService.forEachEntitiesInChunk(chunk.getX(), chunk.getZ(), entity ->
+                    this.entityCounts.increment(entity.getEntityType().getIdentifier())
+            );
         }
 
         @Override

@@ -32,7 +32,6 @@ import java.util.UUID;
  * @author IWareQ
  */
 public class AllayCommandSender extends AbstractCommandSender<CommandSender> {
-
     public AllayCommandSender(CommandSender delegate) {
         super(delegate);
     }

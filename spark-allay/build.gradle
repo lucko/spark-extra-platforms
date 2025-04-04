@@ -9,7 +9,7 @@ tasks.withType(JavaCompile).configureEach {
 
 dependencies {
     implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
-    compileOnly 'org.allaymc.allay:api:0.1.3'
+    compileOnly 'org.allaymc.allay:api:0.3.0'
 }
 
 repositories {

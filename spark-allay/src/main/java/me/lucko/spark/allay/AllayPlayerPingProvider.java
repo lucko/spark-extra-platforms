@@ -31,7 +31,6 @@ import java.util.Map;
  * @author IWareQ
  */
 public class AllayPlayerPingProvider implements PlayerPingProvider {
-
     private final Server server;
 
     public AllayPlayerPingProvider(Server server) {
@@ -41,7 +40,7 @@ public class AllayPlayerPingProvider implements PlayerPingProvider {
     @Override
     public Map<String, Integer> poll() {
         Map<String, Integer> result = new HashMap<>();
-        for (var player : this.server.getOnlinePlayers().values()) {
+        for (var player : this.server.getPlayerService().getPlayers().values()) {
             result.put(player.getCommandSenderName(), player.getPing());
         }
         return Collections.unmodifiableMap(result);
