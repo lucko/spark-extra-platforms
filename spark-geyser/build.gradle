@@ -10,10 +10,10 @@ tasks.withType(JavaCompile) {
 dependencies {
     implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
 
-    implementation 'net.kyori:adventure-text-serializer-legacy:4.14.0'
-    compileOnly 'org.geysermc.geyser:api:2.4.2-SNAPSHOT'
+    implementation 'net.kyori:adventure-text-serializer-legacy:4.17.0'
+    compileOnly 'org.geysermc.geyser:api:2.7.0-SNAPSHOT'
     compileOnly 'com.google.guava:guava:29.0-jre'
-    compileOnly('org.geysermc.geyser:core:2.4.2-SNAPSHOT') {
+    compileOnly('org.geysermc.geyser:core:2.7.0-SNAPSHOT') {
         transitive(false)
     }
 }
