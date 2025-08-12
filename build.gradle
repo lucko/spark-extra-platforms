@@ -17,7 +17,7 @@ subprojects {
     apply plugin: 'org.cadixdev.licenser'
 
     ext {
-        baseVersion = '1.10.119'
+        baseVersion = '1.10.142'
         pluginVersion = baseVersion + '-SNAPSHOT'
         pluginDescription = 'spark is a performance profiling plugin/mod for Minecraft clients, servers and proxies.'
 
@@ -63,7 +63,6 @@ subprojects {
 
     repositories {
         mavenCentral()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://repo.lucko.me/" }
         maven { url "https://jitpack.io" }
         // mavenLocal()
