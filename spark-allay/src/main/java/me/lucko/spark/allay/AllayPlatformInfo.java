@@ -51,7 +51,8 @@ public class AllayPlatformInfo implements PlatformInfo {
             var gitProperties = Class.forName("org.allaymc.server.utils.GitProperties");
             var getBuildApiVersion = gitProperties.getMethod("getBuildApiVersion");
             return String.valueOf(getBuildApiVersion.invoke(null));
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                 InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }

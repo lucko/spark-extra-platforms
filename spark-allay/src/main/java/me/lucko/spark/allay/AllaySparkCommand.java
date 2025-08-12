@@ -25,6 +25,7 @@ import org.allaymc.api.command.CommandResult;
 import org.allaymc.api.command.CommandSender;
 import org.allaymc.api.command.SimpleCommand;
 import org.allaymc.api.command.tree.CommandTree;
+import org.allaymc.api.permission.Permission;
 
 /**
  * @author IWareQ
@@ -35,7 +36,7 @@ public class AllaySparkCommand extends SimpleCommand {
     public AllaySparkCommand(SparkPlatform platform) {
         super("spark", "spark");
         this.platform = platform;
-        this.permissions.add("spark");
+        this.permissions.add(Permission.create("spark"));
     }
 
     // only for game overloads
