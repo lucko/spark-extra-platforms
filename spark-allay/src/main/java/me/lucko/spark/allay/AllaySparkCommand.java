@@ -25,6 +25,9 @@ import org.allaymc.api.command.CommandResult;
 import org.allaymc.api.command.CommandSender;
 import org.allaymc.api.command.SimpleCommand;
 import org.allaymc.api.command.tree.CommandTree;
+import org.allaymc.api.permission.Permission;
+
+import java.util.List;
 
 /**
  * @author IWareQ
@@ -33,7 +36,7 @@ public class AllaySparkCommand extends SimpleCommand {
     private final SparkPlatform platform;
 
     public AllaySparkCommand(SparkPlatform platform) {
-        super("spark", "spark");
+        super("spark", "spark", List.of(Permission.create("spark", "The permission to use the command /spark")));
         this.platform = platform;
     }
 
