@@ -36,40 +36,55 @@ public class AllaySparkCommand extends SimpleCommand {
     private final SparkPlatform platform;
 
     public AllaySparkCommand(SparkPlatform platform) {
+        // TODO: remove list of permissions when Allay 0.7+ is released
         super("spark", "spark", List.of(Permission.create("spark", "The permission to use the command /spark")));
         this.platform = platform;
     }
 
-    // only for game overloads
+    /**
+     * Only for client overloads
+     */
     @Override
     public void prepareCommandTree(CommandTree tree) {
-        tree.getRoot()
-                .key("help").root()
-                .key("profiler")
-                .key("info").up()
-                .key("open").up()
-                .key("start").enums("startFlags",
-                        "--timeout",
-                        "--thread",
-                        "--only-ticks-over",
-                        "--interval",
-                        "--alloc"
-                ).str("value").optional().up(3)
-                .key("stop").up()
-                .key("cancel").root()
-                .key("tps").root()
-                .key("ping").enums("pingFlags", "--player").optional().str("value").root()
-                .key("healthreport").enums("healthreportFlags", "--memory", "--network").optional().str("value").optional().root()
-                .key("tickmonitor").enums("tickmonitorFlags",
-                        "--threshold",
-                        "--threshold-tick",
-                        "--without-gc"
-                ).optional().str("value").optional().optional().root()
-                .key("gc").root()
-                .key("gcmonitor").root()
-                .key("heapsummary").enums("heapsummaryFlags", "--save-to-file").optional().str("value").root()
-                .key("heapdump").enums("heapdumpFlags", "--compress").str("value").root()
-                .key("activity").enums("activityFlags", "--page").str("value");
+        var root = tree.getRoot();
+        root.key("help");
+
+        var profiler = root.key("profiler");
+        profiler.key("info");
+        profiler.key("open");
+        profiler.key("start").enums("startFlags",
+                "--timeout",
+                "--thread",
+                "--only-ticks-over",
+                "--interval",
+                "--alloc"
+        ).optional().str("value");
+        profiler.key("stop");
+        profiler.key("cancel");
+
+        root.key("tps");
+        root.key("ping")
+                .enums("pingFlags", "--player").optional()
+                .playerTarget("value");
+
+        root.key("healthreport").enums("healthreportFlags", "--upload", "--memory", "--network").optional();
+
+        root.key("tickmonitor").enums("tickmonitorFlags",
+                "--threshold",
+                "--threshold-tick",
+                "--without-gc"
+        ).optional().str("value");
+
+        root.key("gc");
+        root.key("gcmonitor");
+        root.key("heapsummary").key("--save-to-file").optional();
+        root.key("heapdump")
+                .key("--compress").optional()
+                .str("type");
+
+        root.key("activity")
+                .key("--page").optional()
+                .str("page no");
     }
 
     @Override

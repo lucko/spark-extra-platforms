@@ -47,7 +47,9 @@ public class AllayServerConfigProvider extends ServerConfigProvider {
         FILES.put("worlds/world-settings.yml", YamlConfigParser.INSTANCE);
 
         HIDDEN_PATHS.add("network-settings.ip");
+        HIDDEN_PATHS.add("network-settings.ipv6");
         HIDDEN_PATHS.add("network-settings.port");
+        HIDDEN_PATHS.add("network-settings.portv6");
     }
 
     public AllayServerConfigProvider() {
