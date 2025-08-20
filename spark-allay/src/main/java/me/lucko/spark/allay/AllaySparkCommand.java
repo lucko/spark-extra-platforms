@@ -36,8 +36,7 @@ public class AllaySparkCommand extends SimpleCommand {
     private final SparkPlatform platform;
 
     public AllaySparkCommand(SparkPlatform platform) {
-        // TODO: remove list of permissions when Allay 0.7+ is released
-        super("spark", "spark", List.of(Permission.create("spark", "The permission to use the command /spark")));
+        super("spark", "spark", List.of(Permission.createForCommand("spark", "spark")));
         this.platform = platform;
     }
 
