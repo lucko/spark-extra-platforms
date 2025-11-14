@@ -24,6 +24,7 @@ import me.lucko.spark.common.SparkPlatform;
 import me.lucko.spark.common.SparkPlugin;
 import me.lucko.spark.common.monitor.ping.PlayerPingProvider;
 import me.lucko.spark.common.platform.PlatformInfo;
+import me.lucko.spark.common.platform.serverconfig.ServerConfigProvider;
 import me.lucko.spark.common.platform.world.WorldInfoProvider;
 import me.lucko.spark.common.sampler.source.ClassSourceLookup;
 import me.lucko.spark.common.sampler.source.SourceMetadata;
@@ -41,7 +42,6 @@ import java.util.stream.Stream;
  * @author IWareQ
  */
 public class AllaySparkPlugin extends Plugin implements SparkPlugin {
-
     private SparkPlatform platform;
 
     @Override
@@ -76,7 +76,7 @@ public class AllaySparkPlugin extends Plugin implements SparkPlugin {
     public Stream<AllayCommandSender> getCommandSenders() {
         var server = Server.getInstance();
         return Stream.concat(
-                server.getOnlinePlayers().values().stream(),
+                server.getPlayerService().getPlayers().values().stream(),
                 Stream.of(server)
         ).map(AllayCommandSender::new);
     }
@@ -91,9 +91,16 @@ public class AllaySparkPlugin extends Plugin implements SparkPlugin {
         Server.getInstance().getScheduler().runLater(this, task);
     }
 
-    // https://stackoverflow.com/questions/20795373/how-to-map-levels-of-java-util-logging-and-slf4j-logger
     @Override
     public void log(Level level, String msg) {
+        this.log(level, msg, null);
+    }
+
+    /**
+     * @see <a href="https://stackoverflow.com/questions/20795373/how-to-map-levels-of-java-util-logging-and-slf4j-logger">java.util.logging -> slf4j</a>
+     */
+    @Override
+    public void log(Level level, String msg, Throwable throwable) {
         var slf4jLevel = switch (level.getName()) {
             case "ALL", "FINEST" -> org.slf4j.event.Level.TRACE;
             case "FINER", "FINE" -> org.slf4j.event.Level.DEBUG;
@@ -102,7 +109,12 @@ public class AllaySparkPlugin extends Plugin implements SparkPlugin {
             default -> org.slf4j.event.Level.ERROR;
         };
 
-        pluginLogger.atLevel(slf4jLevel).log(msg);
+        var slf4jLogger = pluginLogger.atLevel(slf4jLevel);
+        if (throwable != null) {
+            slf4jLogger.log(msg, throwable);
+        } else {
+            slf4jLogger.log(msg);
+        }
     }
 
     @Override
@@ -139,5 +151,10 @@ public class AllaySparkPlugin extends Plugin implements SparkPlugin {
     @Override
     public PlatformInfo getPlatformInfo() {
         return new AllayPlatformInfo();
+    }
+
+    @Override
+    public ServerConfigProvider createServerConfigProvider() {
+        return new AllayServerConfigProvider();
     }
 }

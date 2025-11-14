@@ -21,8 +21,9 @@
 package me.lucko.spark.allay;
 
 import me.lucko.spark.common.platform.PlatformInfo;
-import org.allaymc.api.AllayAPI;
 import org.allaymc.api.network.ProtocolInfo;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author IWareQ
@@ -46,7 +47,14 @@ public class AllayPlatformInfo implements PlatformInfo {
 
     @Override
     public String getVersion() {
-        return AllayAPI.API_VERSION;
+        try {
+            var gitProperties = Class.forName("org.allaymc.server.utils.GitProperties");
+            var getBuildApiVersion = gitProperties.getMethod("getBuildApiVersion");
+            return String.valueOf(getBuildApiVersion.invoke(null));
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                 InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

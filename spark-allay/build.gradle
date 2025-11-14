@@ -2,14 +2,14 @@ plugins {
     id 'com.gradleup.shadow' version '8.3.0'
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     // override, compile targeting J21
     options.release = 21
 }
 
 dependencies {
     implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
-    compileOnly 'org.allaymc.allay:api:master-SNAPSHOT'
+    compileOnly "org.allaymc.allay:api:0.7.1"
 }
 
 repositories {
@@ -21,7 +21,7 @@ repositories {
 
 processResources {
     from(sourceSets.main.resources.srcDirs) {
-        expand (
+        expand(
                 'pluginVersion': project.pluginVersion,
                 'pluginDescription': project.pluginDescription
         )
@@ -42,11 +42,7 @@ shadowJar {
     relocate 'me.lucko.bytesocks.client', 'me.lucko.spark.lib.bytesocks'
     relocate 'org.java_websocket', 'me.lucko.spark.lib.bytesocks.ws'
 
-    exclude 'module-info.class'
-    exclude 'META-INF/maven/**'
-    exclude 'META-INF/proguard/**'
-    exclude '**/*.proto'
-    exclude '**/*.proto.bin'
+    project.applyExcludes(delegate)
 }
 
 artifacts {

@@ -30,7 +30,6 @@ import java.util.Map;
  * @author IWareQ
  */
 public class AllayClassSourceLookup extends ClassSourceLookup.ByFirstUrlSource {
-
     private final Map<ClassLoader, String> classLoaders2PluginName = new HashMap<>();
 
     public AllayClassSourceLookup(PluginManager manager) {
@@ -42,7 +41,6 @@ public class AllayClassSourceLookup extends ClassSourceLookup.ByFirstUrlSource {
 
     @Override
     public String identify(ClassLoader loader) {
-        if (!this.classLoaders2PluginName.containsKey(loader)) return null;
         return this.classLoaders2PluginName.get(loader);
     }
 }

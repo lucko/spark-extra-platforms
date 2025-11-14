@@ -25,6 +25,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.allaymc.api.command.CommandSender;
 import org.allaymc.api.entity.interfaces.EntityPlayer;
+import org.allaymc.api.permission.Permission;
 
 import java.util.UUID;
 
@@ -32,7 +33,6 @@ import java.util.UUID;
  * @author IWareQ
  */
 public class AllayCommandSender extends AbstractCommandSender<CommandSender> {
-
     public AllayCommandSender(CommandSender delegate) {
         super(delegate);
     }
@@ -44,8 +44,10 @@ public class AllayCommandSender extends AbstractCommandSender<CommandSender> {
 
     @Override
     public UUID getUniqueId() {
-        if (this.delegate instanceof EntityPlayer player)
-            return player.getUUID();
+        if (this.delegate instanceof EntityPlayer player) {
+            return player.getLoginData().getUuid();
+        }
+
         return null;
     }
 
@@ -56,6 +58,6 @@ public class AllayCommandSender extends AbstractCommandSender<CommandSender> {
 
     @Override
     public boolean hasPermission(String permission) {
-        return this.delegate.hasPermission(permission);
+        return this.delegate.hasPermission(Permission.get(permission));
     }
 }
