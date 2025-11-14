@@ -85,16 +85,26 @@ public class WaterdogSparkPlugin extends Plugin implements SparkPlugin {
 
     @Override
     public void log(Level level, String msg) {
-        if (level == Level.INFO) {
-            getLogger().info(msg);
-        } else if (level == Level.WARNING) {
-            getLogger().warn(msg);
-        } else if (level == Level.SEVERE) {
+        if (level.intValue() >= 1000) { // severe
             getLogger().error(msg);
+        } else if (level.intValue() >= 900) { // warning
+            getLogger().warn(msg);
         } else {
-            throw new IllegalArgumentException(level.getName());
+            getLogger().info(msg);
         }
     }
+
+    @Override
+    public void log(Level level, String msg, Throwable throwable) {
+        if (level.intValue() >= 1000) { // severe
+            getLogger().error(msg, throwable);
+        } else if (level.intValue() >= 900) { // warning
+            getLogger().warn(msg, throwable);
+        } else {
+            getLogger().info(msg, throwable);
+        }
+    }
+
 
     @Override
     public ClassSourceLookup createClassSourceLookup() {

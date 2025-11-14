@@ -21,9 +21,7 @@
 package me.lucko.spark.minestom;
 
 import me.lucko.spark.common.sampler.source.ClassSourceLookup;
-
 import net.hollowcube.minestom.extensions.ExtensionBootstrap;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.extensions.Extension;
 import net.minestom.server.extensions.ExtensionClassLoader;
 

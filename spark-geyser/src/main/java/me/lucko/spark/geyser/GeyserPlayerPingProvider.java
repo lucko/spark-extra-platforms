@@ -21,9 +21,7 @@
 package me.lucko.spark.geyser;
 
 import com.google.common.collect.ImmutableMap;
-
 import me.lucko.spark.common.monitor.ping.PlayerPingProvider;
-
 import org.geysermc.geyser.api.GeyserApi;
 import org.geysermc.geyser.api.connection.GeyserConnection;
 

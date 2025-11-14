@@ -21,10 +21,8 @@
 package me.lucko.spark.geyser;
 
 import me.lucko.spark.common.command.sender.AbstractCommandSender;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-
 import org.geysermc.geyser.api.command.CommandSource;
 
 import java.util.UUID;

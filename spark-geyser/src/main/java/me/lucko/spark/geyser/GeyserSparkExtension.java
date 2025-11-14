@@ -25,7 +25,6 @@ import me.lucko.spark.common.SparkPlugin;
 import me.lucko.spark.common.monitor.ping.PlayerPingProvider;
 import me.lucko.spark.common.platform.PlatformInfo;
 import me.lucko.spark.common.sampler.source.ClassSourceLookup;
-
 import me.lucko.spark.common.sampler.source.SourceMetadata;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.geysermc.event.subscribe.Subscribe;
@@ -118,14 +117,23 @@ public class GeyserSparkExtension implements SparkPlugin, Extension {
 
     @Override
     public void log(Level level, String msg) {
-        if (level == Level.INFO) {
-            this.logger().info(msg);
-        } else if (level == Level.WARNING) {
-            this.logger().warning(msg);
-        } else if (level == Level.SEVERE) {
+        if (level.intValue() >= 1000) { // severe
             this.logger().error(msg);
+        } else if (level.intValue() >= 900) { // warning
+            this.logger().warning(msg);
         } else {
-            throw new IllegalArgumentException(level.getName());
+            this.logger().info(msg);
+        }
+    }
+
+    @Override
+    public void log(Level level, String msg, Throwable throwable) {
+        if (throwable != null || level.intValue() >= 1000) { // severe
+            this.logger().error(msg, throwable);
+        } else if (level.intValue() >= 900) { // warning
+            this.logger().warning(msg);
+        } else {
+            this.logger().info(msg);
         }
     }
 
