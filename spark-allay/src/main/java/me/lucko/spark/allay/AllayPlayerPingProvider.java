@@ -40,8 +40,8 @@ public class AllayPlayerPingProvider implements PlayerPingProvider {
     @Override
     public Map<String, Integer> poll() {
         Map<String, Integer> result = new HashMap<>();
-        for (var player : this.server.getPlayerService().getPlayers().values()) {
-            result.put(player.getCommandSenderName(), player.getPing());
+        for (var player : this.server.getPlayerManager().getPlayers().values()) {
+            result.put(player.getOriginName(), player.getPing());
         }
         return Collections.unmodifiableMap(result);
     }

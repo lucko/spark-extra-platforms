@@ -1,5 +1,6 @@
 plugins {
     id 'com.gradleup.shadow' version '8.3.0'
+    id 'org.allaymc.gradle.plugin' version '0.1.2'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -7,16 +8,21 @@ tasks.withType(JavaCompile).configureEach {
     options.release = 21
 }
 
-dependencies {
-    implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
-    compileOnly "org.allaymc.allay:api:0.7.1"
+allay {
+    api = "0.17.0-SNAPSHOT"
+
+    plugin {
+        it.entrance = "me.lucko.spark.allay.AllaySparkPlugin"
+        it.name = "spark"
+        it.description = project.pluginDescription
+        it.authors = ["Luck", "IWareQ", "daoge_cmd"]
+        it.version = project.pluginVersion
+        it.website = "https://spark.lucko.me/"
+    }
 }
 
-repositories {
-    maven { url 'https://jitpack.io' }
-    maven { url 'https://repo.opencollab.dev/maven-releases/' }
-    maven { url 'https://repo.opencollab.dev/maven-snapshots/' }
-    maven { url 'https://storehouse.okaeri.eu/repository/maven-public/' }
+dependencies {
+    implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
 }
 
 processResources {

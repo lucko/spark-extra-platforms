@@ -21,22 +21,20 @@
 package me.lucko.spark.allay;
 
 import me.lucko.spark.common.SparkPlatform;
+import org.allaymc.api.command.Command;
 import org.allaymc.api.command.CommandResult;
 import org.allaymc.api.command.CommandSender;
-import org.allaymc.api.command.SimpleCommand;
 import org.allaymc.api.command.tree.CommandTree;
 import org.allaymc.api.permission.Permission;
-
-import java.util.List;
 
 /**
  * @author IWareQ
  */
-public class AllaySparkCommand extends SimpleCommand {
+public class AllaySparkCommand extends Command {
     private final SparkPlatform platform;
 
     public AllaySparkCommand(SparkPlatform platform) {
-        super("spark", "spark", List.of(Permission.createForCommand("spark", "spark")));
+        super("spark", "Spark main command", Permission.createForCommand("spark", "spark.command"));
         this.platform = platform;
     }
 

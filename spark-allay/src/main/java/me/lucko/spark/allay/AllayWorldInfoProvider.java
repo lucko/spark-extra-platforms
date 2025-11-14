@@ -25,9 +25,9 @@ import me.lucko.spark.common.platform.world.CountMap;
 import me.lucko.spark.common.platform.world.WorldInfoProvider;
 import org.allaymc.api.registry.Registries;
 import org.allaymc.api.server.Server;
-import org.allaymc.api.utils.Identifier;
+import org.allaymc.api.utils.identifier.Identifier;
 import org.allaymc.api.world.chunk.Chunk;
-import org.allaymc.api.world.service.EntityService;
+import org.allaymc.api.world.manager.EntityManager;
 
 import java.util.*;
 
@@ -45,15 +45,15 @@ public class AllayWorldInfoProvider implements WorldInfoProvider {
         for (var world : server.getWorldPool().getWorlds().values()) {
             for (var dimension : world.getDimensions().values()) {
                 entities += dimension.getEntities().size();
-                blockEntities += dimension.getChunkService().getLoadedChunks()
+                blockEntities += dimension.getChunkManager().getLoadedChunks()
                         .stream()
                         .mapToInt(chunk -> chunk.getBlockEntities().size())
                         .sum();
-                chunks += dimension.getChunkService().getLoadedChunks().size();
+                chunks += dimension.getChunkManager().getLoadedChunks().size();
             }
         }
 
-        return new CountsResult(server.getPlayerService().getPlayers().size(), entities, blockEntities, chunks);
+        return new CountsResult(server.getPlayerManager().getPlayers().size(), entities, blockEntities, chunks);
     }
 
     @Override
@@ -62,9 +62,9 @@ public class AllayWorldInfoProvider implements WorldInfoProvider {
 
         for (var world : Server.getInstance().getWorldPool().getWorlds().values()) {
             for (var dimension : world.getDimensions().values()) {
-                var entityService = dimension.getEntityService();
-                var chunks = dimension.getChunkService().getLoadedChunks();
-                var chunkInfos = chunks.stream().map(chunk -> new AllayChunkInfo(chunk, entityService)).toList();
+                var entityManager = dimension.getEntityManager();
+                var chunks = dimension.getChunkManager().getLoadedChunks();
+                var chunkInfos = chunks.stream().map(chunk -> new AllayChunkInfo(chunk, entityManager)).toList();
 
                 result.put(world.getWorldData().getDisplayName() + "_" + dimension.getDimensionInfo(), chunkInfos);
             }
@@ -98,9 +98,9 @@ public class AllayWorldInfoProvider implements WorldInfoProvider {
     public static class AllayChunkInfo extends AbstractChunkInfo<Identifier> {
         private final CountMap<Identifier> entityCounts = new CountMap.Simple<>(new HashMap<>());
 
-        protected AllayChunkInfo(Chunk chunk, EntityService entityService) {
+        protected AllayChunkInfo(Chunk chunk, EntityManager entityManager) {
             super(chunk.getX(), chunk.getZ());
-            entityService.forEachEntitiesInChunk(chunk.getX(), chunk.getZ(), entity ->
+            entityManager.forEachEntitiesInChunk(chunk.getX(), chunk.getZ(), entity ->
                     this.entityCounts.increment(entity.getEntityType().getIdentifier())
             );
         }

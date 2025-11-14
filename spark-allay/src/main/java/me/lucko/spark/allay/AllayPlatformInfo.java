@@ -21,7 +21,6 @@
 package me.lucko.spark.allay;
 
 import me.lucko.spark.common.platform.PlatformInfo;
-import org.allaymc.api.network.ProtocolInfo;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -59,6 +58,7 @@ public class AllayPlatformInfo implements PlatformInfo {
 
     @Override
     public String getMinecraftVersion() {
-        return ProtocolInfo.getMinecraftVersionStr();
+        // TODO: Use the actual minecraft version when we can get version through the api
+        return "*";
     }
 }

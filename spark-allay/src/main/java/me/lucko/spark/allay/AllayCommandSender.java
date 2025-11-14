@@ -53,7 +53,7 @@ public class AllayCommandSender extends AbstractCommandSender<CommandSender> {
 
     @Override
     public void sendMessage(Component message) {
-        this.delegate.sendText(LegacyComponentSerializer.legacySection().serialize(message));
+        this.delegate.sendMessage(LegacyComponentSerializer.legacySection().serialize(message));
     }
 
     @Override
