@@ -9,7 +9,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 allay {
-    api = "0.17.0-SNAPSHOT"
+    api = "0.17.0"
 
     plugin {
         it.entrance = "me.lucko.spark.allay.AllaySparkPlugin"
