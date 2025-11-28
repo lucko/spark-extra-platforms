@@ -44,11 +44,7 @@ public class AllayCommandSender extends AbstractCommandSender<CommandSender> {
     @Override
     public UUID getUniqueId() {
         if (this.delegate.isPlayer()) {
-            var player = this.delegate.asPlayer();
-            var controller = player.getController();
-            if (controller != null) {
-                return controller.getLoginData().getUuid();
-            }
+            return this.delegate.asPlayer().getUniqueId();
         }
 
         return null;
