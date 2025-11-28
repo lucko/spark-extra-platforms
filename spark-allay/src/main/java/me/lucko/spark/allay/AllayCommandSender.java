@@ -24,7 +24,6 @@ import me.lucko.spark.common.command.sender.AbstractCommandSender;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.allaymc.api.command.CommandSender;
-import org.allaymc.api.entity.interfaces.EntityPlayer;
 
 import java.util.UUID;
 
