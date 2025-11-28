@@ -25,7 +25,6 @@ import org.allaymc.api.command.Command;
 import org.allaymc.api.command.CommandResult;
 import org.allaymc.api.command.CommandSender;
 import org.allaymc.api.command.tree.CommandTree;
-import org.allaymc.api.permission.Permission;
 
 /**
  * @author IWareQ
@@ -34,7 +33,7 @@ public class AllaySparkCommand extends Command {
     private final SparkPlatform platform;
 
     public AllaySparkCommand(SparkPlatform platform) {
-        super("spark", "Spark main command", Permission.createForCommand("spark", "spark"));
+        super("spark", "Spark main command", "spark.command.spark");
         this.platform = platform;
     }
 

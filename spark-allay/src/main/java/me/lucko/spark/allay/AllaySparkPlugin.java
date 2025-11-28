@@ -76,7 +76,9 @@ public class AllaySparkPlugin extends Plugin implements SparkPlugin {
     public Stream<AllayCommandSender> getCommandSenders() {
         var server = Server.getInstance();
         return Stream.concat(
-                server.getPlayerManager().getPlayers().values().stream(),
+                server.getPlayerManager().getPlayers().values().stream()
+                        .map(player -> player.getControlledEntity())
+                        .filter(entity -> entity != null),
                 Stream.of(server)
         ).map(AllayCommandSender::new);
     }
