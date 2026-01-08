@@ -32,14 +32,12 @@ import me.lucko.spark.api.statistic.misc.DoubleAverageInfo;
 import me.lucko.spark.common.monitor.tick.TickStatistics;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.CraftWorld;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 public class FoliaTickStatistics implements TickStatistics {
@@ -186,39 +184,9 @@ public class FoliaTickStatistics implements TickStatistics {
         }
     }
 
-    /**
-     * Ugly hack to obtain the regioniser for a {@link World} using reflection.
-     */
     private static final class RegioniserReflection {
-        private final AtomicBoolean initialised = new AtomicBoolean(false);
-        private Method getHandleMethod;
-        private Field regioniserField;
-
-        private void initialise(Class<? extends World> craftWorldClass) {
-            try {
-                this.getHandleMethod = craftWorldClass.getMethod("getHandle");
-                this.regioniserField = this.getHandleMethod.getReturnType().getField("regioniser");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        @SuppressWarnings("unchecked")
         public ThreadedRegionizer<TickRegionData, TickRegionSectionData> getRegioniser(World world) {
-            if (this.initialised.compareAndSet(false, true)) {
-                initialise(world.getClass());
-            }
-            if (this.getHandleMethod == null || this.regioniserField == null) {
-                return null;
-            }
-
-            try {
-                Object handle = this.getHandleMethod.invoke(world);
-                return (ThreadedRegionizer<TickRegionData, TickRegionSectionData>) this.regioniserField.get(handle);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
+            return ((CraftWorld) world).getHandle().regioniser;
         }
     }
 }
