@@ -33,6 +33,7 @@ import me.lucko.spark.common.monitor.tick.TickStatistics;
 import org.bukkit.Server;
 import org.bukkit.World;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class FoliaTickStatistics implements TickStatistics {
 
     private static final RegioniserReflection REGIONISER_REFLECTION = new RegioniserReflection();
 
-    private final Supplier<List<ThreadedRegion<TickRegionData, TickRegionSectionData>>> regionSupplier;
+    private final Supplier<List<WeakReference<ThreadedRegion<TickRegionData, TickRegionSectionData>>>> regionSupplier;
 
     public FoliaTickStatistics(Server server) {
         this.regionSupplier = Suppliers.memoizeWithExpiration(() -> getRegions(server), 5, TimeUnit.MILLISECONDS);
@@ -97,12 +98,12 @@ public class FoliaTickStatistics implements TickStatistics {
         return mspt(StatisticWindow.MillisPerTick.MINUTES_5);
     }
 
-    private static List<ThreadedRegion<TickRegionData, TickRegionSectionData>> getRegions(Server server) {
-        List<ThreadedRegion<TickRegionData, TickRegionSectionData>> regions = new ArrayList<>();
+    private static List<WeakReference<ThreadedRegion<TickRegionData, TickRegionSectionData>>> getRegions(Server server) {
+        List<WeakReference<ThreadedRegion<TickRegionData, TickRegionSectionData>>> regions = new ArrayList<>();
         for (World world : server.getWorlds()) {
             ThreadedRegionizer<TickRegionData, TickRegionSectionData> regionizer = REGIONISER_REFLECTION.getRegioniser(world);
             if (regionizer != null) {
-                regionizer.computeForAllRegions(regions::add);
+                regionizer.computeForAllRegions(region -> regions.add(new WeakReference<>(region)));
             }
         }
         return regions;
@@ -111,6 +112,8 @@ public class FoliaTickStatistics implements TickStatistics {
     public double tps(StatisticWindow.TicksPerSecond window) {
         long nanoTime = System.nanoTime();
         return this.regionSupplier.get().stream()
+                .map(WeakReference::get)
+                .filter(Objects::nonNull)
                 .map(region -> region.getData().getRegionSchedulingHandle())
                 .map(handle -> switch (window) {
                     case SECONDS_5 -> handle.getTickReport5s(nanoTime);
@@ -128,6 +131,8 @@ public class FoliaTickStatistics implements TickStatistics {
     public DoubleAverageInfo mspt(StatisticWindow.MillisPerTick window) {
         long nanoTime = System.nanoTime();
         List<SegmentedAverage> averages = this.regionSupplier.get().stream()
+                .map(WeakReference::get)
+                .filter(Objects::nonNull)
                 .map(region -> region.getData().getRegionSchedulingHandle())
                 .map(handle -> switch (window) {
                     case SECONDS_10 -> handle.getTickReport15s(nanoTime); // close enough!
