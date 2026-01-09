@@ -42,8 +42,6 @@ import java.util.function.Supplier;
 
 public class FoliaTickStatistics implements TickStatistics {
 
-    private static final RegioniserReflection REGIONISER_REFLECTION = new RegioniserReflection();
-
     private final Supplier<List<ThreadedRegion<TickRegionData, TickRegionSectionData>>> regionSupplier;
 
     public FoliaTickStatistics(Server server) {
@@ -98,10 +96,8 @@ public class FoliaTickStatistics implements TickStatistics {
     private static List<ThreadedRegion<TickRegionData, TickRegionSectionData>> getRegions(Server server) {
         List<ThreadedRegion<TickRegionData, TickRegionSectionData>> regions = new ArrayList<>();
         for (World world : server.getWorlds()) {
-            ThreadedRegionizer<TickRegionData, TickRegionSectionData> regionizer = REGIONISER_REFLECTION.getRegioniser(world);
-            if (regionizer != null) {
-                regionizer.computeForAllRegions(regions::add);
-            }
+            final ThreadedRegionizer<TickRegionData, TickRegionSectionData> regioniser = ((CraftWorld) world).getHandle().regioniser;
+            regioniser.computeForAllRegions(regions::add);
         }
         return regions;
     }
@@ -181,12 +177,6 @@ public class FoliaTickStatistics implements TickStatistics {
             }
 
             throw new UnsupportedOperationException("Unsupported percentile: " + percentile);
-        }
-    }
-
-    private static final class RegioniserReflection {
-        public ThreadedRegionizer<TickRegionData, TickRegionSectionData> getRegioniser(World world) {
-            return ((CraftWorld) world).getHandle().regioniser;
         }
     }
 }
