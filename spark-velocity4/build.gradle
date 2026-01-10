@@ -10,8 +10,12 @@ tasks.withType(JavaCompile) {
 
 dependencies {
     implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
-    compileOnly 'com.velocitypowered:velocity-api:4.0.0-SNAPSHOT'
-    annotationProcessor 'com.velocitypowered:velocity-annotation-processor:4.0.0-SNAPSHOT'
+    compileOnly('com.velocitypowered:velocity-api:4.0.0-SNAPSHOT') {
+        exclude group: 'net.kyori', module: 'coffee' // doesn't resolve
+    }
+    annotationProcessor('com.velocitypowered:velocity-annotation-processor:4.0.0-SNAPSHOT') {
+        exclude group: 'net.kyori', module: 'coffee' // doesn't resolve
+    }
 }
 
 repositories {

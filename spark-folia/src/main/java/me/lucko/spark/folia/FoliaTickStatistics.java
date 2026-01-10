@@ -20,11 +20,10 @@
 
 package me.lucko.spark.folia;
 
-import com.google.common.base.Suppliers;
+import ca.spottedleaf.moonrise.common.time.TickData;
+import ca.spottedleaf.moonrise.common.time.TickData.SegmentedAverage;
 import io.papermc.paper.threadedregions.ThreadedRegionizer;
 import io.papermc.paper.threadedregions.ThreadedRegionizer.ThreadedRegion;
-import io.papermc.paper.threadedregions.TickData;
-import io.papermc.paper.threadedregions.TickData.SegmentedAverage;
 import io.papermc.paper.threadedregions.TickRegions.TickRegionData;
 import io.papermc.paper.threadedregions.TickRegions.TickRegionSectionData;
 import me.lucko.spark.api.statistic.StatisticWindow;
@@ -32,24 +31,20 @@ import me.lucko.spark.api.statistic.misc.DoubleAverageInfo;
 import me.lucko.spark.common.monitor.tick.TickStatistics;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.CraftWorld;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 public class FoliaTickStatistics implements TickStatistics {
-
-    private static final RegioniserReflection REGIONISER_REFLECTION = new RegioniserReflection();
-
     private final Supplier<List<ThreadedRegion<TickRegionData, TickRegionSectionData>>> regionSupplier;
 
     public FoliaTickStatistics(Server server) {
-        this.regionSupplier = Suppliers.memoizeWithExpiration(() -> getRegions(server), 5, TimeUnit.MILLISECONDS);
+        this.regionSupplier = new WeakReferenceExpiringSupplier<>(() -> getRegions(server), 5, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -100,10 +95,8 @@ public class FoliaTickStatistics implements TickStatistics {
     private static List<ThreadedRegion<TickRegionData, TickRegionSectionData>> getRegions(Server server) {
         List<ThreadedRegion<TickRegionData, TickRegionSectionData>> regions = new ArrayList<>();
         for (World world : server.getWorlds()) {
-            ThreadedRegionizer<TickRegionData, TickRegionSectionData> regionizer = REGIONISER_REFLECTION.getRegioniser(world);
-            if (regionizer != null) {
-                regionizer.computeForAllRegions(regions::add);
-            }
+            ThreadedRegionizer<TickRegionData, TickRegionSectionData> regionizer = ((CraftWorld) world).getHandle().regioniser;
+            regionizer.computeForAllRegions(regions::add);
         }
         return regions;
     }
@@ -186,39 +179,27 @@ public class FoliaTickStatistics implements TickStatistics {
         }
     }
 
-    /**
-     * Ugly hack to obtain the regioniser for a {@link World} using reflection.
-     */
-    private static final class RegioniserReflection {
-        private final AtomicBoolean initialised = new AtomicBoolean(false);
-        private Method getHandleMethod;
-        private Field regioniserField;
+    private static final class WeakReferenceExpiringSupplier<T> implements Supplier<T> {
+        private final Supplier<T> delegate;
+        private final long durationNanos;
+        private volatile WeakReference<T> ref = new WeakReference<>(null);
+        private volatile long expiryTime = 0;
 
-        private void initialise(Class<? extends World> craftWorldClass) {
-            try {
-                this.getHandleMethod = craftWorldClass.getMethod("getHandle");
-                this.regioniserField = this.getHandleMethod.getReturnType().getField("regioniser");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        WeakReferenceExpiringSupplier(Supplier<T> delegate, long duration, TimeUnit unit) {
+            this.delegate = delegate;
+            this.durationNanos = unit.toNanos(duration);
         }
 
-        @SuppressWarnings("unchecked")
-        public ThreadedRegionizer<TickRegionData, TickRegionSectionData> getRegioniser(World world) {
-            if (this.initialised.compareAndSet(false, true)) {
-                initialise(world.getClass());
+        @Override
+        public T get() {
+            long now = System.nanoTime();
+            T value = this.ref.get();
+            if (value == null || now >= this.expiryTime) {
+                value = this.delegate.get();
+                this.ref = new WeakReference<>(value);
+                this.expiryTime = now + this.durationNanos;
             }
-            if (this.getHandleMethod == null || this.regioniserField == null) {
-                return null;
-            }
-
-            try {
-                Object handle = this.getHandleMethod.invoke(world);
-                return (ThreadedRegionizer<TickRegionData, TickRegionSectionData>) this.regioniserField.get(handle);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
+            return value;
         }
     }
 }

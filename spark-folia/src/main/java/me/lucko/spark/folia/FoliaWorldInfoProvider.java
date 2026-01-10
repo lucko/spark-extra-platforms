@@ -24,8 +24,10 @@ import io.papermc.paper.threadedregions.scheduler.RegionScheduler;
 import me.lucko.spark.common.platform.world.AbstractChunkInfo;
 import me.lucko.spark.common.platform.world.CountMap;
 import me.lucko.spark.common.platform.world.WorldInfoProvider;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Chunk;
 import org.bukkit.GameRule;
+import org.bukkit.Registry;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -88,6 +90,7 @@ public class FoliaWorldInfoProvider implements WorldInfoProvider {
         return data;
     }
 
+    @SuppressWarnings("removal")
     @Override
     public GameRulesResult pollGameRules() {
         GameRulesResult data = new GameRulesResult();
@@ -115,14 +118,14 @@ public class FoliaWorldInfoProvider implements WorldInfoProvider {
         return data;
     }
 
-    @SuppressWarnings({"removal", "UnstableApiUsage"})
     @Override
     public Collection<DataPackInfo> pollDataPacks() {
-        return this.server.getDataPackManager().getDataPacks().stream()
+        this.server.getDatapackManager().refreshPacks();
+        return this.server.getDatapackManager().getPacks().stream()
                 .map(pack -> new DataPackInfo(
-                        pack.getTitle(),
-                        pack.getDescription(),
-                        pack.getSource().name().toLowerCase(Locale.ROOT).replace("_", "")
+                        PlainTextComponentSerializer.plainText().serialize(pack.getTitle()),
+                        PlainTextComponentSerializer.plainText().serialize(pack.getDescription()),
+                        pack.getSource().toString().toLowerCase(Locale.ROOT).replace("_", "")
                 ))
                 .collect(Collectors.toList());
     }
