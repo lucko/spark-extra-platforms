@@ -32,7 +32,6 @@ import me.lucko.spark.common.platform.world.WorldInfoProvider;
 import me.lucko.spark.common.sampler.ThreadDumper;
 import me.lucko.spark.common.sampler.source.ClassSourceLookup;
 import me.lucko.spark.common.sampler.source.SourceMetadata;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
@@ -47,7 +46,6 @@ import java.util.logging.Level;
 import java.util.stream.Stream;
 
 public class FoliaSparkPlugin extends JavaPlugin implements SparkPlugin {
-    private BukkitAudiences audienceFactory;
     private ThreadDumper gameThreadDumper;
 
     private SparkPlatform platform;
@@ -62,7 +60,6 @@ public class FoliaSparkPlugin extends JavaPlugin implements SparkPlugin {
             return;
         }
 
-        this.audienceFactory = BukkitAudiences.create(this);
         this.gameThreadDumper = new ThreadDumper.Regex(ImmutableSet.of("Region Scheduler Thread #\\d+"));
 
         this.platform = new SparkPlatform(this);
@@ -78,13 +75,13 @@ public class FoliaSparkPlugin extends JavaPlugin implements SparkPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        this.platform.executeCommand(new FoliaCommandSender(sender, this.audienceFactory), args);
+        this.platform.executeCommand(new FoliaCommandSender(sender), args);
         return true;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        return this.platform.tabCompleteCommand(new FoliaCommandSender(sender, this.audienceFactory), args);
+        return this.platform.tabCompleteCommand(new FoliaCommandSender(sender), args);
     }
 
     @Override
@@ -107,7 +104,7 @@ public class FoliaSparkPlugin extends JavaPlugin implements SparkPlugin {
         return Stream.concat(
                 getServer().getOnlinePlayers().stream(),
                 Stream.of(getServer().getConsoleSender())
-        ).map(sender -> new FoliaCommandSender(sender, this.audienceFactory));
+        ).map(sender -> new FoliaCommandSender(sender));
     }
 
     @Override

@@ -21,8 +21,6 @@
 package me.lucko.spark.folia;
 
 import me.lucko.spark.common.command.sender.AbstractCommandSender;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -30,11 +28,9 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 
 public class FoliaCommandSender extends AbstractCommandSender<CommandSender> {
-    private final Audience audience;
 
-    public FoliaCommandSender(CommandSender sender, BukkitAudiences audienceFactory) {
+    public FoliaCommandSender(CommandSender sender) {
         super(sender);
-        this.audience = audienceFactory.sender(sender);
     }
 
     @Override
@@ -52,7 +48,7 @@ public class FoliaCommandSender extends AbstractCommandSender<CommandSender> {
 
     @Override
     public void sendMessage(Component message) {
-        this.audience.sendMessage(message);
+        super.delegate.sendMessage(message);
     }
 
     @Override

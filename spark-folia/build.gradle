@@ -13,8 +13,6 @@ java {
 
 dependencies {
     implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
-
-    implementation 'net.kyori:adventure-platform-bukkit:4.4.0'
     paperweight.foliaDevBundle("1.21.11-R0.1-SNAPSHOT")
 }
 
@@ -41,9 +39,6 @@ tasks {
 shadowJar {
     archiveFileName = "spark-${project.pluginVersion}-folia.jar"
 
-    relocate 'net.kyori.adventure', 'me.lucko.spark.lib.adventure'
-    relocate 'net.kyori.examination', 'me.lucko.spark.lib.adventure.examination'
-    relocate 'net.kyori.option', 'me.lucko.spark.lib.adventure.option'
     relocate 'net.bytebuddy', 'me.lucko.spark.lib.bytebuddy'
     relocate 'com.google.protobuf', 'me.lucko.spark.lib.protobuf'
     relocate 'org.objectweb.asm', 'me.lucko.spark.lib.asm'
