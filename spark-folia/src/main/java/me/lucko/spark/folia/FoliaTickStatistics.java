@@ -48,6 +48,11 @@ public class FoliaTickStatistics implements TickStatistics {
     }
 
     @Override
+    public int gameTargetTps() {
+        return 20;
+    }
+
+    @Override
     public double tps5Sec() {
         return tps(StatisticWindow.TicksPerSecond.SECONDS_5);
     }
