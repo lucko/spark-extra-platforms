@@ -12,6 +12,7 @@ rootProject.name = 'spark-extra-platforms'
 include (
         'spark-folia',
         'spark-geyser',
+        'spark-hytale',
         'spark-minestom',
         'spark-nukkit',
         'spark-sponge7',
