@@ -17,7 +17,7 @@ subprojects {
     apply plugin: 'org.cadixdev.licenser'
 
     ext {
-        baseVersion = '1.10.158'
+        baseVersion = '1.10.165'
         pluginVersion = baseVersion + '-SNAPSHOT'
         pluginDescription = 'spark is a performance profiling plugin/mod for Minecraft clients, servers and proxies.'
 

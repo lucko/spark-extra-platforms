@@ -73,7 +73,7 @@ public class GeyserSparkExtension implements SparkPlugin, Extension {
 
     @Subscribe
     public void onCommandDefine(GeyserDefineCommandsEvent event) {
-        for (me.lucko.spark.common.command.Command command : this.platform.getCommands()) {
+        for (me.lucko.spark.common.command.Command command : this.platform.getCommandManager().getCommands()) {
             event.register(Command.builder(this)
                 .source(CommandSource.class)
                 .name(command.primaryAlias())
