@@ -1,0 +1,56 @@
+plugins {
+    id 'com.gradleup.shadow' version '8.3.0'
+}
+
+tasks.withType(JavaCompile) {
+    options.release = 21
+}
+
+dependencies {
+    implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
+
+    implementation 'com.google.guava:guava:29.0-jre' // TODO: :(
+    implementation 'org.slf4j:slf4j-nop:1.7.36' // TODO: :(
+
+    compileOnly 'com.hypixel.hytale:Server:2026.01.24-6e2d4fc36'
+}
+
+repositories {
+    maven { url 'https://maven.hytale.com/release/' }
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        expand (
+                'pluginVersion': project.pluginVersion,
+                'pluginDescription': project.pluginDescription
+        )
+        include 'manifest.json'
+    }
+}
+
+shadowJar {
+    archiveFileName = "spark-${project.pluginVersion}-hytale.jar"
+
+    dependencies {
+        exclude(dependency('org.checkerframework:checker-qual'))
+        exclude(dependency('com.google.code.findbugs:jsr305'))
+    }
+
+    relocate 'net.kyori.adventure', 'me.lucko.spark.lib.adventure'
+    relocate 'net.kyori.examination', 'me.lucko.spark.lib.adventure.examination'
+    relocate 'net.kyori.option', 'me.lucko.spark.lib.adventure.option'
+    relocate 'net.bytebuddy', 'me.lucko.spark.lib.bytebuddy'
+    relocate 'com.google.protobuf', 'me.lucko.spark.lib.protobuf'
+    relocate 'org.objectweb.asm', 'me.lucko.spark.lib.asm'
+    relocate 'one.profiler', 'me.lucko.spark.lib.asyncprofiler'
+    relocate 'me.lucko.bytesocks.client', 'me.lucko.spark.lib.bytesocks'
+    relocate 'org.java_websocket', 'me.lucko.spark.lib.bytesocks.ws'
+
+    project.applyExcludes(delegate)
+}
+
+artifacts {
+    archives shadowJar
+    shadow shadowJar
+}

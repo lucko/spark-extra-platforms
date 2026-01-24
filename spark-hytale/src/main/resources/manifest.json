@@ -1,0 +1,14 @@
+{
+  "Group": "spark",
+  "Name": "spark",
+  "Version": "${pluginVersion}",
+  "Description": "spark is a performance profiling mod for Hytale",
+  "Authors": [{"Name": "Luck"}],
+  "Website": "https://spark.lucko.me/",
+  "ServerVersion": "*",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "DisabledByDefault": false,
+  "Main": "me.lucko.spark.hytale.HytaleSparkPlugin",
+  "IncludesAssetPack": false
+}
