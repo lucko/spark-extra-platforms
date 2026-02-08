@@ -7,10 +7,14 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
+    implementation("me.lucko:spark-common:${project.baseVersion}-SNAPSHOT") {
+        // use the java11+ bytesocks client instead
+        exclude group: 'me.lucko', module: 'bytesocks-java-client'
+        exclude group: 'org.java_websocket', module: 'Java-WebSocket'
+    }
 
-    implementation 'com.google.guava:guava:29.0-jre' // TODO: :(
-    implementation 'org.slf4j:slf4j-nop:1.7.36' // TODO: :(
+    implementation 'me.lucko:bytesocks-java-client-j11:1.0-SNAPSHOT'
+    implementation 'com.google.guava:guava:19.0'
 
     compileOnly 'com.hypixel.hytale:Server:2026.01.24-6e2d4fc36'
 }
@@ -37,6 +41,9 @@ shadowJar {
         exclude(dependency('com.google.code.findbugs:jsr305'))
     }
 
+    relocate('com.google.common', 'me.lucko.spark.lib.guava') {
+        exclude 'com.google.common.flogger.**'
+    }
     relocate 'net.kyori.adventure', 'me.lucko.spark.lib.adventure'
     relocate 'net.kyori.examination', 'me.lucko.spark.lib.adventure.examination'
     relocate 'net.kyori.option', 'me.lucko.spark.lib.adventure.option'
@@ -45,7 +52,6 @@ shadowJar {
     relocate 'org.objectweb.asm', 'me.lucko.spark.lib.asm'
     relocate 'one.profiler', 'me.lucko.spark.lib.asyncprofiler'
     relocate 'me.lucko.bytesocks.client', 'me.lucko.spark.lib.bytesocks'
-    relocate 'org.java_websocket', 'me.lucko.spark.lib.bytesocks.ws'
 
     project.applyExcludes(delegate)
 }
