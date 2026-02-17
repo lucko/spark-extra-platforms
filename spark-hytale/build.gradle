@@ -16,7 +16,7 @@ dependencies {
     implementation 'me.lucko:bytesocks-java-client-j11:1.0-SNAPSHOT'
     implementation 'com.google.guava:guava:19.0'
 
-    compileOnly 'com.hypixel.hytale:Server:2026.01.24-6e2d4fc36'
+    compileOnly 'com.hypixel.hytale:Server:2026.02.17-255364b8e'
 }
 
 repositories {
