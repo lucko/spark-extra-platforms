@@ -44,6 +44,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
@@ -135,7 +136,7 @@ public class HytaleSparkPlugin extends JavaPlugin implements SparkPlugin {
         return SourceMetadata.gather(
                 PluginManager.get().getPlugins(),
                 PluginBase::getName,
-                plugin -> plugin.getManifest().getVersion().toString(),
+                plugin -> Objects.toString(plugin.getManifest().getVersion(), null),
                 plugin -> plugin.getManifest().getAuthors().stream().map(AuthorInfo::getName).collect(Collectors.joining(", ")),
                 plugin -> plugin.getManifest().getDescription(),
                 plugin -> plugin.getIdentifier().getGroup().equals("Hytale")
