@@ -60,7 +60,7 @@ public class FoliaSparkPlugin extends JavaPlugin implements SparkPlugin {
             return;
         }
 
-        this.gameThreadDumper = new ThreadDumper.Regex(ImmutableSet.of("Region Scheduler Thread #\\d+"));
+        this.gameThreadDumper = new ThreadDumper.Regex(ImmutableSet.of("Folia Region Scheduler Thread #\\d+"));
 
         this.platform = new SparkPlatform(this);
         this.platform.enable();
