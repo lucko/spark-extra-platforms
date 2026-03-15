@@ -3,15 +3,13 @@ plugins {
 }
 
 tasks.withType(JavaCompile) {
-    // override, compile targeting J11
-    options.release = 11
+    options.release = 17
 }
 
 dependencies {
     implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
-    compileOnly('dev.waterdog.waterdogpe:waterdog:1.2.3') {
-        exclude group: 'com.nukkitx.protocol'
-    }
+    implementation 'com.google.guava:guava:19.0'
+    compileOnly('dev.waterdog.waterdogpe:waterdog:2.0.4-SNAPSHOT')
 }
 
 repositories {
@@ -37,6 +35,7 @@ shadowJar {
     relocate 'net.kyori.examination', 'me.lucko.spark.lib.adventure.examination'
     relocate 'net.kyori.option', 'me.lucko.spark.lib.adventure.option'
     relocate 'net.bytebuddy', 'me.lucko.spark.lib.bytebuddy'
+    relocate 'com.google.common', 'me.lucko.spark.lib.guava'
     relocate 'com.google.protobuf', 'me.lucko.spark.lib.protobuf'
     relocate 'org.objectweb.asm', 'me.lucko.spark.lib.asm'
     relocate 'one.profiler', 'me.lucko.spark.lib.asyncprofiler'
