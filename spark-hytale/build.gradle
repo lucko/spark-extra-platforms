@@ -1,8 +1,8 @@
 plugins {
-    id 'com.gradleup.shadow' version '8.3.0'
+    id 'com.gradleup.shadow' version '8.3.8'
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.release = 21
 }
 
@@ -16,7 +16,7 @@ dependencies {
     implementation 'me.lucko:bytesocks-java-client-j11:1.0-SNAPSHOT'
     implementation 'com.google.guava:guava:19.0'
 
-    compileOnly 'com.hypixel.hytale:Server:2026.02.17-255364b8e'
+    compileOnly 'com.hypixel.hytale:Server:2026.03.26-89796e57b'
 }
 
 repositories {

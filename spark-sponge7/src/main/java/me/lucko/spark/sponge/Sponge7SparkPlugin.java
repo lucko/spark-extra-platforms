@@ -22,6 +22,7 @@ package me.lucko.spark.sponge;
 
 import com.google.inject.Inject;
 import me.lucko.spark.api.Spark;
+import me.lucko.spark.common.SparkBuildInfo;
 import me.lucko.spark.common.SparkPlatform;
 import me.lucko.spark.common.SparkPlugin;
 import me.lucko.spark.common.monitor.ping.PlayerPingProvider;
@@ -58,8 +59,8 @@ import java.util.stream.Stream;
 @Plugin(
         id = "spark",
         name = "spark",
-        version = "@version@",
-        description = "@desc@",
+        version = SparkBuildInfo.VERSION,
+        description = SparkBuildInfo.DESCRIPTION,
         authors = {"Luck"}
 )
 public class Sponge7SparkPlugin implements SparkPlugin {
