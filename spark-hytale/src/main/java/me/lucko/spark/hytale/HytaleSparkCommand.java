@@ -47,7 +47,7 @@ public class HytaleSparkCommand extends AbstractCommand {
     public @Nullable CompletableFuture<Void> acceptCall(@NonNull CommandSender sender, @NonNull ParserContext parserContext, @NonNull ParseResult parseResult) {
         String inputString = parserContext.getInputString();
         String[] args = inputString.split(" ");
-        return this.platform.executeCommand(HytaleCommandSender.of(sender), Arrays.copyOfRange(args, 1, args.length));
+        return this.platform.executeCommand(new HytaleCommandSender(sender), Arrays.copyOfRange(args, 1, args.length));
     }
 
     @Override
@@ -58,6 +58,6 @@ public class HytaleSparkCommand extends AbstractCommand {
 
     @Override
     public boolean hasPermission(@NonNull CommandSender sender) {
-        return this.platform.hasPermissionForAnyCommand(HytaleCommandSender.of(sender));
+        return this.platform.hasPermissionForAnyCommand(new HytaleCommandSender(sender));
     }
 }

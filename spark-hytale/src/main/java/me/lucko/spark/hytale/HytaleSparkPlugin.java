@@ -109,10 +109,10 @@ public class HytaleSparkPlugin extends JavaPlugin implements SparkPlugin {
     }
 
     @Override
-    public Stream<HytaleCommandSender<?>> getCommandSenders() {
+    public Stream<HytaleCommandSender> getCommandSenders() {
         return Stream.concat(
-                Universe.get().getPlayers().stream().map(HytaleCommandSender::of),
-                Stream.of(HytaleCommandSender.of(ConsoleSender.INSTANCE))
+                Universe.get().getPlayers().stream().map(HytaleCommandSender::new),
+                Stream.of(new HytaleCommandSender(ConsoleSender.INSTANCE))
         );
     }
 

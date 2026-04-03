@@ -16,11 +16,12 @@ dependencies {
     implementation 'me.lucko:bytesocks-java-client-j11:1.0-SNAPSHOT'
     implementation 'com.google.guava:guava:19.0'
 
-    compileOnly 'com.hypixel.hytale:Server:2026.03.26-89796e57b'
+    // https://maven.hytale.com/release/com/hypixel/hytale/Server/maven-metadata.xml
+    compileOnly 'com.hypixel.hytale:Server:2026.04.02-51731a32a'
 }
 
 repositories {
-    maven { url 'https://maven.hytale.com/release/' }
+    maven { url 'https://maven.hytale.com/pre-release/' }
 }
 
 processResources {
