@@ -6,6 +6,9 @@ tasks.withType(JavaCompile).configureEach {
     options.release = 21
 }
 
+var hytaleVersion = '0.5.0'
+var hytaleRepo = 'release'
+
 dependencies {
     implementation("me.lucko:spark-common:${project.baseVersion}-SNAPSHOT") {
         // use the java11+ bytesocks client instead
@@ -16,18 +19,19 @@ dependencies {
     implementation 'me.lucko:bytesocks-java-client-j11:1.0-SNAPSHOT'
     implementation 'com.google.guava:guava:19.0'
 
-    compileOnly 'com.hypixel.hytale:Server:2026.03.26-89796e57b'
+    compileOnly "com.hypixel.hytale:Server:$hytaleVersion"
 }
 
 repositories {
-    maven { url 'https://maven.hytale.com/release/' }
+    maven { url "https://maven.hytale.com/${hytaleRepo}/" }
 }
 
 processResources {
     from(sourceSets.main.resources.srcDirs) {
         expand (
                 'pluginVersion': project.pluginVersion,
-                'pluginDescription': project.pluginDescription
+                'pluginDescription': project.pluginDescription,
+                'hytaleVersion': hytaleVersion
         )
         include 'manifest.json'
     }
