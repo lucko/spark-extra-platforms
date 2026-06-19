@@ -20,8 +20,6 @@
 
 package me.lucko.spark.folia;
 
-import ca.spottedleaf.moonrise.common.time.TickData;
-import ca.spottedleaf.moonrise.common.time.TickData.SegmentedAverage;
 import io.papermc.paper.threadedregions.ThreadedRegionizer;
 import io.papermc.paper.threadedregions.ThreadedRegionizer.ThreadedRegion;
 import io.papermc.paper.threadedregions.TickRegions.TickRegionData;
@@ -107,79 +105,111 @@ public class FoliaTickStatistics implements TickStatistics {
     }
 
     public double tps(StatisticWindow.TicksPerSecond window) {
-        long nanoTime = System.nanoTime();
-        return this.regionSupplier.get().stream()
-                .map(region -> region.getData().getRegionSchedulingHandle())
-                .map(handle -> switch (window) {
-                    case SECONDS_5 -> handle.getTickReport5s(nanoTime);
-                    case SECONDS_10 -> handle.getTickReport15s(nanoTime); // close enough!
-                    case MINUTES_1 -> handle.getTickReport1m(nanoTime);
-                    case MINUTES_5 -> handle.getTickReport5m(nanoTime);
-                    case MINUTES_15 -> handle.getTickReport15m(nanoTime);
-                })
-                .filter(Objects::nonNull)
-                .mapToDouble(data -> data.tpsData().segmentAll().average())
-                .average()
-                .orElse(20.0);
+        try {
+            long nanoTime = System.nanoTime();
+            return this.regionSupplier.get().stream()
+                    .map(region -> region.getData().getRegionSchedulingHandle())
+                    .map(handle -> switch (window) {
+                        case SECONDS_5 -> handle.getTickReport5s(nanoTime);
+                        case SECONDS_10 -> handle.getTickReport15s(nanoTime); // close enough!
+                        case MINUTES_1 -> handle.getTickReport1m(nanoTime);
+                        case MINUTES_5 -> handle.getTickReport5m(nanoTime);
+                        case MINUTES_15 -> handle.getTickReport15m(nanoTime);
+                    })
+                    .filter(Objects::nonNull)
+                    .mapToDouble(data -> data.tpsData().segmentAll().average())
+                    .average()
+                    .orElse(20.0);
+        } catch (LinkageError e) {
+            return 20.0;
+        }
     }
 
     public DoubleAverageInfo mspt(StatisticWindow.MillisPerTick window) {
-        long nanoTime = System.nanoTime();
-        List<SegmentedAverage> averages = this.regionSupplier.get().stream()
-                .map(region -> region.getData().getRegionSchedulingHandle())
-                .map(handle -> switch (window) {
-                    case SECONDS_10 -> handle.getTickReport15s(nanoTime); // close enough!
-                    case MINUTES_1 -> handle.getTickReport1m(nanoTime);
-                    case MINUTES_5 -> handle.getTickReport5m(nanoTime);
-                })
-                .filter(Objects::nonNull)
-                .map(TickData.TickReportData::timePerTickData)
-                .toList();
-        return new SegmentedDoubleAverageInfo(averages);
+        try {
+            long nanoTime = System.nanoTime();
+            return this.regionSupplier.get().stream()
+                    .map(region -> region.getData().getRegionSchedulingHandle())
+                    .map(handle -> switch (window) {
+                        case SECONDS_10 -> handle.getTickReport15s(nanoTime);
+                        case MINUTES_1 -> handle.getTickReport1m(nanoTime);
+                        case MINUTES_5 -> handle.getTickReport5m(nanoTime);
+                    })
+                    .filter(Objects::nonNull)
+                    .map(data -> data.timePerTickData())
+                    .collect(SegmentedDoubleAverageInfo::new, SegmentedDoubleAverageInfo::accept, SegmentedDoubleAverageInfo::combine);
+        } catch (LinkageError e) {
+            return new SegmentedDoubleAverageInfo();
+        }
     }
 
-    private record SegmentedDoubleAverageInfo(List<SegmentedAverage> averages) implements DoubleAverageInfo {
+    private static final class SegmentedDoubleAverageInfo implements DoubleAverageInfo {
+        private double meanSum = 0;
+        private double max = 0;
+        private double min = Double.MAX_VALUE;
+        private double medianSum = 0;
+        private double p95Sum = 0;
+        private int count = 0;
+
+        SegmentedDoubleAverageInfo() {
+        }
+
+        void accept(Object avg) {
+            try {
+                Object all = avg.getClass().getMethod("segmentAll").invoke(avg);
+                double avgVal = (double) all.getClass().getMethod("average").invoke(all) / 1.0E6;
+                double greatest = (double) all.getClass().getMethod("greatest").invoke(all) / 1.0E6;
+                double least = (double) all.getClass().getMethod("least").invoke(all) / 1.0E6;
+                double median = (double) all.getClass().getMethod("median").invoke(all) / 1.0E6;
+
+                Object worst = avg.getClass().getMethod("segment5PercentWorst").invoke(avg);
+                double p95 = (double) worst.getClass().getMethod("average").invoke(worst) / 1.0E6;
+
+                this.meanSum += avgVal;
+                this.max = Math.max(this.max, greatest);
+                this.min = Math.min(this.min, least);
+                this.medianSum += median;
+                this.p95Sum += p95;
+                this.count++;
+            } catch (ReflectiveOperationException e) {
+                // skip
+            }
+        }
+
+        void combine(SegmentedDoubleAverageInfo other) {
+            this.meanSum += other.meanSum;
+            this.max = Math.max(this.max, other.max);
+            this.min = Math.min(this.min, other.min);
+            this.medianSum += other.medianSum;
+            this.p95Sum += other.p95Sum;
+            this.count += other.count;
+        }
 
         @Override
         public double mean() {
-            return this.averages.stream()
-                    .mapToDouble(avg -> avg.segmentAll().average() / 1.0E6)
-                    .average()
-                    .orElse(0);
+            return this.count == 0 ? 0 : this.meanSum / this.count;
         }
 
         @Override
         public double max() {
-            return this.averages.stream()
-                    .mapToDouble(avg -> avg.segmentAll().greatest() / 1.0E6)
-                    .max()
-                    .orElse(0);
+            return this.count == 0 ? 0 : this.max;
         }
 
         @Override
         public double min() {
-            return this.averages.stream()
-                    .mapToDouble(avg -> avg.segmentAll().least() / 1.0E6)
-                    .min()
-                    .orElse(0);
+            return this.count == 0 ? 0 : this.min;
         }
 
         @Override
         public double percentile(double percentile) {
-            if (percentile == 0.50d) {
-                // median
-                return this.averages.stream()
-                        .mapToDouble(avg -> avg.segmentAll().median() / 1.0E6)
-                        .average()
-                        .orElse(0);
-            } else if (percentile == 0.95d) {
-                // 95th percentile
-                return this.averages.stream()
-                        .mapToDouble(avg -> avg.segment5PercentWorst().average() / 1.0E6)
-                        .average()
-                        .orElse(0);
+            if (this.count == 0) {
+                return 0;
             }
-
+            if (percentile == 0.50d) {
+                return this.medianSum / this.count;
+            } else if (percentile == 0.95d) {
+                return this.p95Sum / this.count;
+            }
             throw new UnsupportedOperationException("Unsupported percentile: " + percentile);
         }
     }
