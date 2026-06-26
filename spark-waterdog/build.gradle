@@ -9,6 +9,7 @@ tasks.withType(JavaCompile).configureEach {
 
 dependencies {
     implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
+    implementation 'com.google.guava:guava:19.0'
     compileOnly('dev.waterdog.waterdogpe:waterdog:1.2.3') {
         exclude group: 'com.nukkitx.protocol'
     }
@@ -33,6 +34,14 @@ processResources {
 shadowJar {
     archiveFileName = "spark-${project.pluginVersion}-waterdog.jar"
 
+    dependencies {
+        exclude(dependency('org.checkerframework:checker-qual'))
+        exclude(dependency('com.google.code.findbugs:jsr305'))
+    }
+
+    relocate('com.google.common', 'me.lucko.spark.lib.guava') {
+        exclude 'com.google.common.flogger.**'
+    }
     relocate 'net.kyori.adventure', 'me.lucko.spark.lib.adventure'
     relocate 'net.kyori.examination', 'me.lucko.spark.lib.adventure.examination'
     relocate 'net.kyori.option', 'me.lucko.spark.lib.adventure.option'

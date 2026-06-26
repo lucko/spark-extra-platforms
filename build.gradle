@@ -14,7 +14,7 @@ subprojects {
     apply plugin: 'dev.yumi.gradle.licenser'
 
     ext {
-        baseVersion = '1.10.172'
+        baseVersion = '1.10.173'
         pluginVersion = baseVersion + '-SNAPSHOT'
         pluginDescription = 'spark is a performance profiling plugin/mod for Minecraft clients, servers and proxies.'
 
