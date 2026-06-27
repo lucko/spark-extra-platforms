@@ -39,9 +39,7 @@ shadowJar {
         exclude(dependency('com.google.code.findbugs:jsr305'))
     }
 
-    relocate('com.google.common', 'me.lucko.spark.lib.guava') {
-        exclude 'com.google.common.flogger.**'
-    }
+    relocate 'com.google.common', 'me.lucko.spark.lib.guava'
     relocate 'net.kyori.adventure', 'me.lucko.spark.lib.adventure'
     relocate 'net.kyori.examination', 'me.lucko.spark.lib.adventure.examination'
     relocate 'net.kyori.option', 'me.lucko.spark.lib.adventure.option'
