@@ -20,8 +20,6 @@
 
 package me.lucko.spark.folia;
 
-import ca.spottedleaf.moonrise.common.time.TickData;
-import ca.spottedleaf.moonrise.common.time.TickData.SegmentedAverage;
 import io.papermc.paper.threadedregions.ThreadedRegionizer;
 import io.papermc.paper.threadedregions.ThreadedRegionizer.ThreadedRegion;
 import io.papermc.paper.threadedregions.TickRegions.TickRegionData;
@@ -34,6 +32,7 @@ import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +41,21 @@ import java.util.function.Supplier;
 
 public class FoliaTickStatistics implements TickStatistics {
     private final Supplier<List<ThreadedRegion<TickRegionData, TickRegionSectionData>>> regionSupplier;
+    private static final Method GET_TPS_DATA_METHOD;
+    private static final Method GET_TIME_PER_TICK_METHOD;
+
+    static {
+        Method tpsDataMethod = null;
+        Method timePerTickMethod = null;
+        try {
+            Class<?> tickReportDataClass = Class.forName("ca.spottedleaf.moonrise.common.time.TickData$TickReportData");
+            tpsDataMethod = tickReportDataClass.getMethod("tpsData");
+            timePerTickMethod = tickReportDataClass.getMethod("timePerTickData");
+        } catch (Exception e) {
+        }
+        GET_TPS_DATA_METHOD = tpsDataMethod;
+        GET_TIME_PER_TICK_METHOD = timePerTickMethod;
+    }
 
     public FoliaTickStatistics(Server server) {
         this.regionSupplier = new WeakReferenceExpiringSupplier<>(() -> getRegions(server), 5, TimeUnit.MILLISECONDS);
@@ -107,43 +121,75 @@ public class FoliaTickStatistics implements TickStatistics {
     }
 
     public double tps(StatisticWindow.TicksPerSecond window) {
+        if (GET_TPS_DATA_METHOD == null) {
+            return 20.0;
+        }
         long nanoTime = System.nanoTime();
         return this.regionSupplier.get().stream()
                 .map(region -> region.getData().getRegionSchedulingHandle())
                 .map(handle -> switch (window) {
                     case SECONDS_5 -> handle.getTickReport5s(nanoTime);
-                    case SECONDS_10 -> handle.getTickReport15s(nanoTime); // close enough!
+                    case SECONDS_10 -> handle.getTickReport15s(nanoTime);
                     case MINUTES_1 -> handle.getTickReport1m(nanoTime);
                     case MINUTES_5 -> handle.getTickReport5m(nanoTime);
                     case MINUTES_15 -> handle.getTickReport15m(nanoTime);
                 })
                 .filter(Objects::nonNull)
-                .mapToDouble(data -> data.tpsData().segmentAll().average())
+                .mapToDouble(data -> {
+                    try {
+                        Object tpsData = GET_TPS_DATA_METHOD.invoke(data);
+                        Method segmentAllMethod = tpsData.getClass().getMethod("segmentAll");
+                        Object segmentAll = segmentAllMethod.invoke(tpsData);
+                        Method averageMethod = segmentAll.getClass().getMethod("average");
+                        return (double) averageMethod.invoke(segmentAll);
+                    } catch (Exception e) {
+                        return 20.0;
+                    }
+                })
                 .average()
                 .orElse(20.0);
     }
 
     public DoubleAverageInfo mspt(StatisticWindow.MillisPerTick window) {
+        if (GET_TIME_PER_TICK_METHOD == null) {
+            return new SegmentedDoubleAverageInfo(List.of());
+        }
         long nanoTime = System.nanoTime();
-        List<SegmentedAverage> averages = this.regionSupplier.get().stream()
+        List<Object> averages = this.regionSupplier.get().stream()
                 .map(region -> region.getData().getRegionSchedulingHandle())
                 .map(handle -> switch (window) {
-                    case SECONDS_10 -> handle.getTickReport15s(nanoTime); // close enough!
+                    case SECONDS_10 -> handle.getTickReport15s(nanoTime);
                     case MINUTES_1 -> handle.getTickReport1m(nanoTime);
                     case MINUTES_5 -> handle.getTickReport5m(nanoTime);
                 })
                 .filter(Objects::nonNull)
-                .map(TickData.TickReportData::timePerTickData)
+                .map(data -> {
+                    try {
+                        return GET_TIME_PER_TICK_METHOD.invoke(data);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .toList();
         return new SegmentedDoubleAverageInfo(averages);
     }
 
-    private record SegmentedDoubleAverageInfo(List<SegmentedAverage> averages) implements DoubleAverageInfo {
+    private record SegmentedDoubleAverageInfo(List<Object> averages) implements DoubleAverageInfo {
 
         @Override
         public double mean() {
             return this.averages.stream()
-                    .mapToDouble(avg -> avg.segmentAll().average() / 1.0E6)
+                    .mapToDouble(avg -> {
+                        try {
+                            Method segmentAllMethod = avg.getClass().getMethod("segmentAll");
+                            Object segmentAll = segmentAllMethod.invoke(avg);
+                            Method averageMethod = segmentAll.getClass().getMethod("average");
+                            return (double) averageMethod.invoke(segmentAll) / 1.0E6;
+                        } catch (Exception e) {
+                            return 0;
+                        }
+                    })
                     .average()
                     .orElse(0);
         }
@@ -151,7 +197,16 @@ public class FoliaTickStatistics implements TickStatistics {
         @Override
         public double max() {
             return this.averages.stream()
-                    .mapToDouble(avg -> avg.segmentAll().greatest() / 1.0E6)
+                    .mapToDouble(avg -> {
+                        try {
+                            Method segmentAllMethod = avg.getClass().getMethod("segmentAll");
+                            Object segmentAll = segmentAllMethod.invoke(avg);
+                            Method greatestMethod = segmentAll.getClass().getMethod("greatest");
+                            return (double) greatestMethod.invoke(segmentAll) / 1.0E6;
+                        } catch (Exception e) {
+                            return 0;
+                        }
+                    })
                     .max()
                     .orElse(0);
         }
@@ -159,7 +214,16 @@ public class FoliaTickStatistics implements TickStatistics {
         @Override
         public double min() {
             return this.averages.stream()
-                    .mapToDouble(avg -> avg.segmentAll().least() / 1.0E6)
+                    .mapToDouble(avg -> {
+                        try {
+                            Method segmentAllMethod = avg.getClass().getMethod("segmentAll");
+                            Object segmentAll = segmentAllMethod.invoke(avg);
+                            Method leastMethod = segmentAll.getClass().getMethod("least");
+                            return (double) leastMethod.invoke(segmentAll) / 1.0E6;
+                        } catch (Exception e) {
+                            return 0;
+                        }
+                    })
                     .min()
                     .orElse(0);
         }
@@ -167,15 +231,31 @@ public class FoliaTickStatistics implements TickStatistics {
         @Override
         public double percentile(double percentile) {
             if (percentile == 0.50d) {
-                // median
                 return this.averages.stream()
-                        .mapToDouble(avg -> avg.segmentAll().median() / 1.0E6)
+                        .mapToDouble(avg -> {
+                            try {
+                                Method segmentAllMethod = avg.getClass().getMethod("segmentAll");
+                                Object segmentAll = segmentAllMethod.invoke(avg);
+                                Method medianMethod = segmentAll.getClass().getMethod("median");
+                                return (double) medianMethod.invoke(segmentAll) / 1.0E6;
+                            } catch (Exception e) {
+                                return 0;
+                            }
+                        })
                         .average()
                         .orElse(0);
             } else if (percentile == 0.95d) {
-                // 95th percentile
                 return this.averages.stream()
-                        .mapToDouble(avg -> avg.segment5PercentWorst().average() / 1.0E6)
+                        .mapToDouble(avg -> {
+                            try {
+                                Method segment5PercentWorstMethod = avg.getClass().getMethod("segment5PercentWorst");
+                                Object segment5PercentWorst = segment5PercentWorstMethod.invoke(avg);
+                                Method averageMethod = segment5PercentWorst.getClass().getMethod("average");
+                                return (double) averageMethod.invoke(segment5PercentWorst) / 1.0E6;
+                            } catch (Exception e) {
+                                return 0;
+                            }
+                        })
                         .average()
                         .orElse(0);
             }
