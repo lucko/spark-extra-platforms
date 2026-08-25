@@ -13,7 +13,7 @@ repositories {
 }
 
 shadowJar {
-    archiveFileName = "spark-${project.pluginVersion}-sponge7.jar"
+    archiveFileName = "spark-${project.baseVersion}-build${project.extraVersion}-sponge7.jar"
 
     relocate 'net.kyori.adventure', 'me.lucko.spark.lib.adventure'
     relocate 'net.kyori.examination', 'me.lucko.spark.lib.adventure.examination'

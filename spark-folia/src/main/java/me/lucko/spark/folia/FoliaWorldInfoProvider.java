@@ -27,7 +27,6 @@ import me.lucko.spark.common.platform.world.WorldInfoProvider;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Chunk;
 import org.bukkit.GameRule;
-import org.bukkit.Registry;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;

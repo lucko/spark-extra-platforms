@@ -37,7 +37,7 @@ processResources {
 }
 
 shadowJar {
-    archiveFileName = "spark-${project.pluginVersion}-hytale.jar"
+    archiveFileName = "spark-${project.baseVersion}-build${project.extraVersion}-hytale.jar"
 
     dependencies {
         exclude(dependency('org.checkerframework:checker-qual'))

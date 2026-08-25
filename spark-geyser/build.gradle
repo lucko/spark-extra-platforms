@@ -33,7 +33,7 @@ processResources {
 }
 
 shadowJar {
-    archiveFileName = "spark-${project.pluginVersion}-geyser.jar"
+    archiveFileName = "spark-${project.baseVersion}-build${project.extraVersion}-geyser.jar"
 
     relocate 'net.kyori.adventure', 'me.lucko.spark.lib.adventure'
     relocate 'net.kyori.examination', 'me.lucko.spark.lib.adventure.examination'

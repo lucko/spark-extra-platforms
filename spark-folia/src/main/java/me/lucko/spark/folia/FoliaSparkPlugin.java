@@ -32,6 +32,7 @@ import me.lucko.spark.common.platform.world.WorldInfoProvider;
 import me.lucko.spark.common.sampler.ThreadDumper;
 import me.lucko.spark.common.sampler.source.ClassSourceLookup;
 import me.lucko.spark.common.sampler.source.SourceMetadata;
+import me.lucko.spark.folia.compat.FoliaTickStatisticsPre26;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
@@ -52,9 +53,7 @@ public class FoliaSparkPlugin extends JavaPlugin implements SparkPlugin {
 
     @Override
     public void onEnable() {
-        try {
-            Class.forName("io.papermc.paper.threadedregions.scheduler.RegionScheduler");
-        } catch (ClassNotFoundException e) {
+        if (!classExists("io.papermc.paper.threadedregions.scheduler.RegionScheduler")) {
             getLogger().severe("This version of spark requires Folia! Please use the regular Bukkit plugin instead.");
             getServer().getPluginManager().disablePlugin(this);
             return;
@@ -134,7 +133,10 @@ public class FoliaSparkPlugin extends JavaPlugin implements SparkPlugin {
 
     @Override
     public TickStatistics createTickStatistics() {
-        return new FoliaTickStatistics(getServer());
+        if (classExists("ca.spottedleaf.common.time.TickData")) {
+            return new FoliaTickStatistics(getServer());
+        }
+        return new FoliaTickStatisticsPre26(getServer());
     }
 
     @Override
@@ -176,6 +178,15 @@ public class FoliaSparkPlugin extends JavaPlugin implements SparkPlugin {
     @Override
     public void registerApi(Spark api) {
         getServer().getServicesManager().register(Spark.class, api, this, ServicePriority.Normal);
+    }
+
+    private static boolean classExists(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
 }

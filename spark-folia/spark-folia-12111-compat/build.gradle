@@ -1,0 +1,20 @@
+plugins {
+    id 'io.papermc.paperweight.userdev'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
+}
+
+java {
+    disableAutoTargetJvm()
+}
+
+dependencies {
+    implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
+    paperweight.foliaDevBundle("1.21.11-R0.1-SNAPSHOT")
+}
+
+repositories {
+    maven { url "https://repo.papermc.io/repository/maven-public/" }
+}

@@ -11,11 +11,11 @@ plugins {
 rootProject.name = 'spark-extra-platforms'
 include (
         'spark-folia',
+        'spark-folia:spark-folia-12111-compat',
         'spark-geyser',
         'spark-hytale',
         'spark-minestom',
         'spark-nukkit',
         'spark-sponge7',
-        'spark-velocity4',
         'spark-waterdog',
 )

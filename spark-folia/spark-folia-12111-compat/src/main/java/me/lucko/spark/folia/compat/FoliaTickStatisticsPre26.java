@@ -18,10 +18,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package me.lucko.spark.folia;
+package me.lucko.spark.folia.compat;
 
-import ca.spottedleaf.common.time.TickData;
-import ca.spottedleaf.common.time.TickData.SegmentedAverage;
+import ca.spottedleaf.moonrise.common.time.TickData;
+import ca.spottedleaf.moonrise.common.time.TickData.SegmentedAverage;
 import io.papermc.paper.threadedregions.ThreadedRegionizer;
 import io.papermc.paper.threadedregions.ThreadedRegionizer.ThreadedRegion;
 import io.papermc.paper.threadedregions.TickRegions.TickRegionData;
@@ -44,11 +44,14 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-public class FoliaTickStatistics implements TickStatistics {
+/**
+ * Provides tick statistics, using the pre Minecraft 26.x API.
+ */
+public class FoliaTickStatisticsPre26 implements TickStatistics {
     private final Supplier<List<ThreadedRegion<TickRegionData, TickRegionSectionData>>> regionSupplier;
     private final ScheduledFuture<?> metricsTask;
 
-    public FoliaTickStatistics(Server server) {
+    public FoliaTickStatisticsPre26(Server server) {
         this.regionSupplier = new WeakReferenceExpiringSupplier<>(() -> getRegions(server), 5, TimeUnit.MILLISECONDS);
 
         // collect metrics every 15 seconds - although the Metrics class expects recordings every 10 seconds,

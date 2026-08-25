@@ -25,10 +25,14 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.util.thread.TickingThread;
 import me.lucko.spark.api.statistic.misc.DoubleAverageInfo;
+import me.lucko.spark.common.monitor.Metrics;
+import me.lucko.spark.common.monitor.MonitoringExecutor;
 import me.lucko.spark.common.monitor.tick.TickStatistics;
+import me.lucko.spark.common.util.TimeUtil;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -37,6 +41,23 @@ import java.util.stream.Collectors;
  * Provides tick statistics by reading from {@link World#getBufferedTickLengthMetricSet()}.
  */
 public class HytaleTickStatistics implements TickStatistics {
+
+    private final ScheduledFuture<?> metricsTask;
+
+    public HytaleTickStatistics() {
+        this.metricsTask = MonitoringExecutor.scheduleAtFixedRateMillis(this::collectMetrics, Metrics.INTERVAL_MILLIS);
+    }
+
+    public void collectMetrics() {
+        long time = TimeUtil.monotonicCurrentTimeMillis();
+        Metrics.TPS.record(time, tps10Sec());
+        Metrics.TICK_DURATION.record(time, duration10Sec());
+    }
+
+    @Override
+    public void close() {
+        this.metricsTask.cancel(false);
+    }
 
     @Override
     public int gameTargetTps() {

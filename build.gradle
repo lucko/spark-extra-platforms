@@ -1,5 +1,6 @@
 plugins {
     id 'dev.yumi.gradle.licenser' version '2.2.2' apply false
+    id 'io.papermc.paperweight.userdev' version '2.0.0-beta.21' apply false
 }
 
 allprojects {
@@ -14,8 +15,9 @@ subprojects {
     apply plugin: 'dev.yumi.gradle.licenser'
 
     ext {
-        baseVersion = '1.10.172'
+        baseVersion = '1.10.181'
         pluginVersion = baseVersion + '-SNAPSHOT'
+        extraVersion = determineExtraVersion()
         pluginDescription = 'spark is a performance profiling plugin/mod for Minecraft clients, servers and proxies.'
 
         applyExcludes = { Jar jarTask ->
@@ -53,4 +55,10 @@ subprojects {
         maven { url "https://jitpack.io" }
         // mavenLocal()
     }
+}
+
+def determineExtraVersion() {
+    return providers.exec {
+        commandLine 'git', 'rev-list', '--count', 'HEAD'
+    }.standardOutput.asText.get().trim()
 }

@@ -1,6 +1,6 @@
 plugins {
     id 'com.gradleup.shadow' version '8.3.8'
-    id 'io.papermc.paperweight.userdev' version '2.0.0-beta.17'
+    id 'io.papermc.paperweight.userdev'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -13,7 +13,10 @@ java {
 
 dependencies {
     implementation "me.lucko:spark-common:${project.baseVersion}-SNAPSHOT"
-    paperweight.foliaDevBundle("1.21.11-R0.1-SNAPSHOT")
+    implementation(project(':spark-folia:spark-folia-12111-compat')) {
+        transitive = false
+    }
+    paperweight.foliaDevBundle("26.2.build.6-beta")
 }
 
 repositories {
@@ -30,14 +33,8 @@ processResources {
     }
 }
 
-tasks {
-    assemble {
-        dependsOn reobfJar
-    }
-}
-
 shadowJar {
-    archiveFileName = "spark-${project.pluginVersion}-folia.jar"
+    archiveFileName = "spark-${project.baseVersion}-build${project.extraVersion}-folia.jar"
 
     dependencies {
         exclude(dependency('net.kyori:^(?!adventure-text-feature-pagination).+$'))

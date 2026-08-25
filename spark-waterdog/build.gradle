@@ -32,7 +32,7 @@ processResources {
 }
 
 shadowJar {
-    archiveFileName = "spark-${project.pluginVersion}-waterdog.jar"
+    archiveFileName = "spark-${project.baseVersion}-build${project.extraVersion}-waterdog.jar"
 
     dependencies {
         exclude(dependency('org.checkerframework:checker-qual'))
