@@ -31,6 +31,7 @@ import me.lucko.spark.api.statistic.misc.DoubleAverageInfo;
 import me.lucko.spark.common.monitor.Metrics;
 import me.lucko.spark.common.monitor.MonitoringExecutor;
 import me.lucko.spark.common.monitor.tick.TickStatistics;
+import me.lucko.spark.common.util.ImmutableDoubleAverageInfo;
 import me.lucko.spark.common.util.TimeUtil;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -60,7 +61,7 @@ public class FoliaTickStatistics implements TickStatistics {
     public void collectMetrics() {
         long time = TimeUtil.monotonicCurrentTimeMillis();
         Metrics.TPS.record(time, tps10Sec());
-        Metrics.TICK_DURATION.record(time, duration10Sec());
+        Metrics.TICK_DURATION.record(time, new ImmutableDoubleAverageInfo(duration10Sec()));
     }
 
     @Override
