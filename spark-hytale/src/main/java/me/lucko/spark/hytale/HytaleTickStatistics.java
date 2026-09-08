@@ -143,67 +143,72 @@ public class HytaleTickStatistics implements TickStatistics {
         return ticksProcessed / period.seconds();
     }
 
+    /**
+     * A snapshot of tick duration statistics, computed upfront.
+     *
+     * <p>Instances can be kept in memory for up to an hour, so they must not
+     * hold a reference to a {@link World}.</p>
+     */
     private static class AggregatedMsptInfo implements DoubleAverageInfo {
         private static final double NANOS_PER_MILLI = TimeUnit.MILLISECONDS.toNanos(1);
 
-        private final List<World> worlds;
-        private final BufferedTickLengthMetricSetPeriod period;
+        private final double mean;
+        private final double max;
+        private final double min;
+        private final long[] sortedSamplesNanos;
 
         AggregatedMsptInfo(List<World> worlds, BufferedTickLengthMetricSetPeriod period) {
-            this.worlds = worlds;
-            this.period = period;
-            BufferedTickLengthMetricSetPeriod.checkWorldMetricPeriodsMatch(this.worlds);
+            BufferedTickLengthMetricSetPeriod.checkWorldMetricPeriodsMatch(worlds);
+
+            double meanTotal = 0;
+            int meanCount = 0;
+            double max = 0;
+            double min = Double.MAX_VALUE;
+            long[] samples = new long[0];
+
+            for (World world : worlds) {
+                HistoricMetric metric = world.getBufferedTickLengthMetricSet();
+
+                double avgNanos = metric.getAverage(period.ordinal());
+                if (avgNanos > 0) {
+                    meanTotal += avgNanos / NANOS_PER_MILLI;
+                    meanCount++;
+                }
+
+                long maxNanos = metric.calculateMax(period.ordinal());
+                if (maxNanos > 0 && maxNanos < Long.MAX_VALUE) {
+                    max = Math.max(max, maxNanos / NANOS_PER_MILLI);
+                }
+
+                long minNanos = metric.calculateMin(period.ordinal());
+                if (minNanos > 0 && minNanos < Long.MAX_VALUE) {
+                    min = Math.min(min, minNanos / NANOS_PER_MILLI);
+                }
+
+                samples = concat(samples, metric.getValues(period.ordinal()));
+            }
+
+            Arrays.sort(samples);
+
+            this.mean = meanCount > 0 ? meanTotal / meanCount : 0;
+            this.max = max;
+            this.min = min == Double.MAX_VALUE ? 0 : min;
+            this.sortedSamplesNanos = samples;
         }
 
         @Override
         public double mean() {
-            if (this.worlds.isEmpty()) {
-                return 0;
-            }
-
-            double total = 0;
-            int count = 0;
-
-            for (World world : this.worlds) {
-                HistoricMetric metric = world.getBufferedTickLengthMetricSet();
-                double avgNanos = metric.getAverage(this.period.ordinal());
-                if (avgNanos > 0) {
-                    total += avgNanos / NANOS_PER_MILLI;
-                    count++;
-                }
-            }
-
-            return count > 0 ? total / count : 0;
+            return this.mean;
         }
 
         @Override
         public double max() {
-            double max = 0;
-            for (World world : this.worlds) {
-                long maxNanos = world.getBufferedTickLengthMetricSet().calculateMax(this.period.ordinal());
-                if (maxNanos > 0 && maxNanos < Long.MAX_VALUE) {
-                    double ms = maxNanos / NANOS_PER_MILLI;
-                    if (ms > max) {
-                        max = ms;
-                    }
-                }
-            }
-            return max;
+            return this.max;
         }
 
         @Override
         public double min() {
-            double min = Double.MAX_VALUE;
-            for (World world : this.worlds) {
-                long minNanos = world.getBufferedTickLengthMetricSet().calculateMin(this.period.ordinal());
-                if (minNanos > 0 && minNanos < Long.MAX_VALUE) {
-                    double ms = minNanos / NANOS_PER_MILLI;
-                    if (ms < min) {
-                        min = ms;
-                    }
-                }
-            }
-            return min == Double.MAX_VALUE ? 0 : min;
+            return this.min;
         }
 
         @Override
@@ -212,20 +217,12 @@ public class HytaleTickStatistics implements TickStatistics {
                 throw new IllegalArgumentException("Invalid percentile " + percentile);
             }
 
-            long[] samples = new long[0];
-            for (World world : this.worlds) {
-                long[] values = world.getBufferedTickLengthMetricSet().getValues(this.period.ordinal());
-                samples = concat(samples, values);
-            }
-
-            if (samples.length == 0) {
+            if (this.sortedSamplesNanos.length == 0) {
                 return 0;
             }
 
-            Arrays.sort(samples);
-
-            int rank = (int) Math.ceil(percentile * (samples.length - 1));
-            long sampleNanos = samples[rank];
+            int rank = (int) Math.ceil(percentile * (this.sortedSamplesNanos.length - 1));
+            long sampleNanos = this.sortedSamplesNanos[rank];
             return sampleNanos / NANOS_PER_MILLI;
         }
 
