@@ -20,40 +20,29 @@
 
 package me.lucko.spark.waterdog;
 
-import dev.waterdog.waterdogpe.ProxyServer;
 import dev.waterdog.waterdogpe.plugin.Plugin;
 import dev.waterdog.waterdogpe.plugin.PluginClassLoader;
+import dev.waterdog.waterdogpe.plugin.PluginManager;
 import me.lucko.spark.common.sampler.source.ClassSourceLookup;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 public class WaterdogClassSourceLookup extends ClassSourceLookup.ByClassLoader {
-    private final ProxyServer proxy;
-    private final Map<ClassLoader, String> cache;
 
-    public WaterdogClassSourceLookup(ProxyServer proxy) {
-        this.proxy = proxy;
-        this.cache = new WeakHashMap<>();
+    private final Map<ClassLoader, String> pluginClassLoaders;
+
+    public WaterdogClassSourceLookup(PluginManager pluginManager) {
+        this.pluginClassLoaders = new HashMap<>();
+        for (Plugin plugin : pluginManager.getPlugins()) {
+            this.pluginClassLoaders.put(plugin.getClass().getClassLoader(), plugin.getName());
+        }
     }
 
     @Override
-    public String identify(ClassLoader loader) throws ReflectiveOperationException {
+    public String identify(ClassLoader loader) {
         if (loader instanceof PluginClassLoader) {
-            String name = this.cache.get(loader);
-            if (name != null) {
-                return name;
-            }
-
-            for (Plugin plugin : this.proxy.getPluginManager().getPlugins()) {
-                if (plugin.getClass().getClassLoader() == loader) {
-                    name = plugin.getName();
-                    break;
-                }
-            }
-
-            this.cache.put(loader, name);
-            return name;
+            return this.pluginClassLoaders.get(loader);
         }
         return null;
     }

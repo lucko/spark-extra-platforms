@@ -108,7 +108,7 @@ public class WaterdogSparkPlugin extends Plugin implements SparkPlugin {
 
     @Override
     public ClassSourceLookup createClassSourceLookup() {
-        return new WaterdogClassSourceLookup(getProxy());
+        return new WaterdogClassSourceLookup(getProxy().getPluginManager());
     }
 
     @Override

@@ -20,18 +20,29 @@
 
 package me.lucko.spark.nukkit;
 
+import cn.nukkit.plugin.Plugin;
 import cn.nukkit.plugin.PluginClassLoader;
+import cn.nukkit.plugin.PluginManager;
 import me.lucko.spark.common.sampler.source.ClassSourceLookup;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
-public class NukkitClassSourceLookup extends ClassSourceLookup.ByFirstUrlSource {
+public class NukkitClassSourceLookup extends ClassSourceLookup.ByClassLoader {
+
+    private final Map<ClassLoader, String> pluginClassLoaders;
+
+    public NukkitClassSourceLookup(PluginManager pluginManager) {
+        this.pluginClassLoaders = new HashMap<>();
+        for (Plugin plugin : pluginManager.getPlugins().values()) {
+            this.pluginClassLoaders.put(plugin.getClass().getClassLoader(), plugin.getName());
+        }
+    }
 
     @Override
-    public String identify(ClassLoader loader) throws IOException, URISyntaxException {
+    public String identify(ClassLoader loader) {
         if (loader instanceof PluginClassLoader) {
-            return super.identify(loader);
+            return this.pluginClassLoaders.get(loader);
         }
         return null;
     }

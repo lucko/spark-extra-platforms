@@ -21,17 +21,30 @@
 package me.lucko.spark.geyser;
 
 import me.lucko.spark.common.sampler.source.ClassSourceLookup;
+import org.geysermc.geyser.api.extension.ExtensionDescription;
 import org.geysermc.geyser.extension.GeyserExtensionClassLoader;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 
-public class GeyserClassSourceLookup extends ClassSourceLookup.ByFirstUrlSource {
+public class GeyserClassSourceLookup extends ClassSourceLookup.ByClassLoader {
+    private static final Field DESCRIPTION_FIELD;
+
+    static {
+        try {
+            DESCRIPTION_FIELD = GeyserExtensionClassLoader.class.getDeclaredField("description");
+            DESCRIPTION_FIELD.setAccessible(true);
+        } catch (ReflectiveOperationException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     @Override
-    public String identify(ClassLoader loader) throws IOException, URISyntaxException {
+    public String identify(ClassLoader loader) throws ReflectiveOperationException {
         if (loader instanceof GeyserExtensionClassLoader) {
-            return super.identify(loader);
+            ExtensionDescription desc = (ExtensionDescription) DESCRIPTION_FIELD.get(loader);
+            return desc.id();
         }
         return null;
     }

@@ -25,7 +25,7 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.util.thread.TickingThread;
 import me.lucko.spark.api.statistic.misc.DoubleAverageInfo;
-import me.lucko.spark.common.monitor.Metrics;
+import me.lucko.spark.common.metric.Metrics;
 import me.lucko.spark.common.monitor.MonitoringExecutor;
 import me.lucko.spark.common.monitor.tick.TickStatistics;
 import me.lucko.spark.common.util.ImmutableDoubleAverageInfo;
@@ -43,16 +43,18 @@ import java.util.stream.Collectors;
  */
 public class HytaleTickStatistics implements TickStatistics {
 
+    private final Metrics metrics;
     private final ScheduledFuture<?> metricsTask;
 
-    public HytaleTickStatistics() {
+    public HytaleTickStatistics(Metrics metrics) {
+        this.metrics = metrics;
         this.metricsTask = MonitoringExecutor.scheduleAtFixedRateMillis(this::collectMetrics, Metrics.INTERVAL_MILLIS);
     }
 
     public void collectMetrics() {
         long time = TimeUtil.monotonicCurrentTimeMillis();
-        Metrics.TPS.record(time, tps10Sec());
-        Metrics.TICK_DURATION.record(time, new ImmutableDoubleAverageInfo(duration10Sec()));
+        this.metrics.tps().record(time, tps10Sec());
+        this.metrics.tickDuration().record(time, new ImmutableDoubleAverageInfo(duration10Sec()));
     }
 
     @Override
@@ -144,106 +146,104 @@ public class HytaleTickStatistics implements TickStatistics {
         return ticksProcessed / period.seconds();
     }
 
-    private static class AggregatedMsptInfo implements DoubleAverageInfo {
-        private static final double NANOS_PER_MILLI = TimeUnit.MILLISECONDS.toNanos(1);
+    private record AggregatedMsptInfo(List<World> worlds,
+                                      BufferedTickLengthMetricSetPeriod period) implements DoubleAverageInfo {
+            private static final double NANOS_PER_MILLI = TimeUnit.MILLISECONDS.toNanos(1);
 
-        private final List<World> worlds;
-        private final BufferedTickLengthMetricSetPeriod period;
-
-        AggregatedMsptInfo(List<World> worlds, BufferedTickLengthMetricSetPeriod period) {
-            this.worlds = worlds;
-            this.period = period;
-            BufferedTickLengthMetricSetPeriod.checkWorldMetricPeriodsMatch(this.worlds);
-        }
-
-        @Override
-        public double mean() {
-            if (this.worlds.isEmpty()) {
-                return 0;
+            private AggregatedMsptInfo(List<World> worlds, BufferedTickLengthMetricSetPeriod period) {
+                this.worlds = worlds;
+                this.period = period;
+                BufferedTickLengthMetricSetPeriod.checkWorldMetricPeriodsMatch(this.worlds);
             }
 
-            double total = 0;
-            int count = 0;
-
-            for (World world : this.worlds) {
-                HistoricMetric metric = world.getBufferedTickLengthMetricSet();
-                double avgNanos = metric.getAverage(this.period.ordinal());
-                if (avgNanos > 0) {
-                    total += avgNanos / NANOS_PER_MILLI;
-                    count++;
+            @Override
+            public double mean() {
+                if (this.worlds.isEmpty()) {
+                    return 0;
                 }
-            }
 
-            return count > 0 ? total / count : 0;
-        }
+                double total = 0;
+                int count = 0;
 
-        @Override
-        public double max() {
-            double max = 0;
-            for (World world : this.worlds) {
-                long maxNanos = world.getBufferedTickLengthMetricSet().calculateMax(this.period.ordinal());
-                if (maxNanos > 0 && maxNanos < Long.MAX_VALUE) {
-                    double ms = maxNanos / NANOS_PER_MILLI;
-                    if (ms > max) {
-                        max = ms;
+                for (World world : this.worlds) {
+                    HistoricMetric metric = world.getBufferedTickLengthMetricSet();
+                    double avgNanos = metric.getAverage(this.period.ordinal());
+                    if (avgNanos > 0) {
+                        total += avgNanos / NANOS_PER_MILLI;
+                        count++;
                     }
                 }
-            }
-            return max;
-        }
 
-        @Override
-        public double min() {
-            double min = Double.MAX_VALUE;
-            for (World world : this.worlds) {
-                long minNanos = world.getBufferedTickLengthMetricSet().calculateMin(this.period.ordinal());
-                if (minNanos > 0 && minNanos < Long.MAX_VALUE) {
-                    double ms = minNanos / NANOS_PER_MILLI;
-                    if (ms < min) {
-                        min = ms;
+                return count > 0 ? total / count : 0;
+            }
+
+            @Override
+            public double max() {
+                double max = 0;
+                for (World world : this.worlds) {
+                    long maxNanos = world.getBufferedTickLengthMetricSet().calculateMax(this.period.ordinal());
+                    if (maxNanos > 0 && maxNanos < Long.MAX_VALUE) {
+                        double ms = maxNanos / NANOS_PER_MILLI;
+                        if (ms > max) {
+                            max = ms;
+                        }
                     }
                 }
-            }
-            return min == Double.MAX_VALUE ? 0 : min;
-        }
-
-        @Override
-        public double percentile(double percentile) {
-            if (percentile < 0 || percentile > 1) {
-                throw new IllegalArgumentException("Invalid percentile " + percentile);
+                return max;
             }
 
-            long[] samples = new long[0];
-            for (World world : this.worlds) {
-                long[] values = world.getBufferedTickLengthMetricSet().getValues(this.period.ordinal());
-                samples = concat(samples, values);
+            @Override
+            public double min() {
+                double min = Double.MAX_VALUE;
+                for (World world : this.worlds) {
+                    long minNanos = world.getBufferedTickLengthMetricSet().calculateMin(this.period.ordinal());
+                    if (minNanos > 0 && minNanos < Long.MAX_VALUE) {
+                        double ms = minNanos / NANOS_PER_MILLI;
+                        if (ms < min) {
+                            min = ms;
+                        }
+                    }
+                }
+                return min == Double.MAX_VALUE ? 0 : min;
             }
 
-            if (samples.length == 0) {
-                return 0;
+            @Override
+            public double percentile(double percentile) {
+                if (percentile < 0 || percentile > 1) {
+                    throw new IllegalArgumentException("Invalid percentile " + percentile);
+                }
+
+                long[] samples = new long[0];
+                for (World world : this.worlds) {
+                    long[] values = world.getBufferedTickLengthMetricSet().getValues(this.period.ordinal());
+                    samples = concat(samples, values);
+                }
+
+                if (samples.length == 0) {
+                    return 0;
+                }
+
+                Arrays.sort(samples);
+
+                int rank = (int) Math.ceil(percentile * (samples.length - 1));
+                long sampleNanos = samples[rank];
+                return sampleNanos / NANOS_PER_MILLI;
             }
 
-            Arrays.sort(samples);
-
-            int rank = (int) Math.ceil(percentile * (samples.length - 1));
-            long sampleNanos = samples[rank];
-            return sampleNanos / NANOS_PER_MILLI;
-        }
-
-        public static long[] concat(long[] a1, long[] a2) {
-            if (a1 != null && a1.length != 0) {
-                if (a2 != null && a2.length != 0) {
-                    long[] newArray = Arrays.copyOf(a1, a1.length + a2.length);
-                    System.arraycopy(a2, 0, newArray, a1.length, a2.length);
-                    return newArray;
+            public static long[] concat(long[] a1, long[] a2) {
+                if (a1 != null && a1.length != 0) {
+                    if (a2 != null && a2.length != 0) {
+                        long[] newArray = Arrays.copyOf(a1, a1.length + a2.length);
+                        System.arraycopy(a2, 0, newArray, a1.length, a2.length);
+                        return newArray;
+                    } else {
+                        return a1;
+                    }
                 } else {
-                    return a1;
+                    return a2;
                 }
-            } else {
-                return a2;
             }
         }
-    }
 
     /**
      * The periods that are used by Hytale's {@link World#getBufferedTickLengthMetricSet()}

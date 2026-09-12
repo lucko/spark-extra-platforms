@@ -22,6 +22,7 @@ package me.lucko.spark.nukkit;
 
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.plugin.Plugin;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.plugin.service.ServicePriority;
 import me.lucko.spark.api.Spark;
@@ -30,8 +31,10 @@ import me.lucko.spark.common.SparkPlugin;
 import me.lucko.spark.common.monitor.ping.PlayerPingProvider;
 import me.lucko.spark.common.platform.PlatformInfo;
 import me.lucko.spark.common.sampler.source.ClassSourceLookup;
+import me.lucko.spark.common.sampler.source.SourceMetadata;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.stream.Stream;
 
@@ -107,7 +110,18 @@ public class NukkitSparkPlugin extends PluginBase implements SparkPlugin {
 
     @Override
     public ClassSourceLookup createClassSourceLookup() {
-        return new NukkitClassSourceLookup();
+        return new NukkitClassSourceLookup(getServer().getPluginManager());
+    }
+
+    @Override
+    public Collection<SourceMetadata> getKnownSources() {
+        return SourceMetadata.gather(
+                getServer().getPluginManager().getPlugins().values(),
+                Plugin::getName,
+                plugin -> plugin.getDescription().getVersion(),
+                plugin -> String.join(", ", plugin.getDescription().getAuthors()),
+                plugin -> plugin.getDescription().getDescription()
+        );
     }
 
     @Override

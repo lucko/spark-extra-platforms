@@ -28,7 +28,7 @@ import io.papermc.paper.threadedregions.TickRegions.TickRegionData;
 import io.papermc.paper.threadedregions.TickRegions.TickRegionSectionData;
 import me.lucko.spark.api.statistic.StatisticWindow;
 import me.lucko.spark.api.statistic.misc.DoubleAverageInfo;
-import me.lucko.spark.common.monitor.Metrics;
+import me.lucko.spark.common.metric.Metrics;
 import me.lucko.spark.common.monitor.MonitoringExecutor;
 import me.lucko.spark.common.monitor.tick.TickStatistics;
 import me.lucko.spark.common.util.ImmutableDoubleAverageInfo;
@@ -49,10 +49,12 @@ import java.util.function.Supplier;
  * Provides tick statistics, using the pre Minecraft 26.x API.
  */
 public class FoliaTickStatisticsPre26 implements TickStatistics {
+    private final Metrics metrics;
     private final Supplier<List<ThreadedRegion<TickRegionData, TickRegionSectionData>>> regionSupplier;
     private final ScheduledFuture<?> metricsTask;
 
-    public FoliaTickStatisticsPre26(Server server) {
+    public FoliaTickStatisticsPre26(Metrics metrics, Server server) {
+        this.metrics = metrics;
         this.regionSupplier = new WeakReferenceExpiringSupplier<>(() -> getRegions(server), 5, TimeUnit.MILLISECONDS);
 
         // collect metrics every 15 seconds - although the Metrics class expects recordings every 10 seconds,
@@ -63,8 +65,8 @@ public class FoliaTickStatisticsPre26 implements TickStatistics {
 
     public void collectMetrics() {
         long time = TimeUtil.monotonicCurrentTimeMillis();
-        Metrics.TPS.record(time, tps10Sec());
-        Metrics.TICK_DURATION.record(time, new ImmutableDoubleAverageInfo(duration10Sec()));
+        this.metrics.tps().record(time, tps10Sec());
+        this.metrics.tickDuration().record(time, new ImmutableDoubleAverageInfo(duration10Sec()));
     }
 
     @Override

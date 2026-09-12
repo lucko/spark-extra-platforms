@@ -156,7 +156,7 @@ public class GeyserSparkExtension implements SparkPlugin, Extension {
     public Collection<SourceMetadata> getKnownSources() {
         return SourceMetadata.gather(
                 geyserApi().extensionManager().extensions(),
-                Extension::name,
+                extension -> extension.description().id(),
                 extension -> extension.description().version(),
                 extension -> String.join(", ", extension.description().authors()),
                 extension -> null

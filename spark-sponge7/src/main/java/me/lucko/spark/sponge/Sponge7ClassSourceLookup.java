@@ -33,11 +33,11 @@ public class Sponge7ClassSourceLookup extends ClassSourceLookup.ByCodeSource {
     }
 
     @Override
-    public String identifyFile(Path path) {
+    public String identify(Path path) {
         if (!path.startsWith(this.modsDirectory)) {
             return null;
         }
 
-        return super.identifyFileName(this.modsDirectory.relativize(path).toString());
+        return formatFileName(this.modsDirectory.relativize(path).toString());
     }
 }

@@ -160,7 +160,7 @@ public class HytaleSparkPlugin extends JavaPlugin implements SparkPlugin {
 
     @Override
     public TickStatistics createTickStatistics() {
-        return new HytaleTickStatistics();
+        return new HytaleTickStatistics(this.platform.getMetrics());
     }
 
     @Override

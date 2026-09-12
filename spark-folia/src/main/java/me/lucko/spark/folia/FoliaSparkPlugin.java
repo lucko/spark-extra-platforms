@@ -134,9 +134,9 @@ public class FoliaSparkPlugin extends JavaPlugin implements SparkPlugin {
     @Override
     public TickStatistics createTickStatistics() {
         if (classExists("ca.spottedleaf.common.time.TickData")) {
-            return new FoliaTickStatistics(getServer());
+            return new FoliaTickStatistics(this.platform.getMetrics(), getServer());
         }
-        return new FoliaTickStatisticsPre26(getServer());
+        return new FoliaTickStatisticsPre26(this.platform.getMetrics(), getServer());
     }
 
     @Override
