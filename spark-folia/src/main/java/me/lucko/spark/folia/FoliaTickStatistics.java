@@ -46,11 +46,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class FoliaTickStatistics implements TickStatistics {
-    private final Metrics metrics;
+    private final Supplier<Metrics> metrics;
     private final Supplier<List<ThreadedRegion<TickRegionData, TickRegionSectionData>>> regionSupplier;
     private final ScheduledFuture<?> metricsTask;
 
-    public FoliaTickStatistics(Metrics metrics, Server server) {
+    public FoliaTickStatistics(Supplier<Metrics> metrics, Server server) {
         this.metrics = metrics;
         this.regionSupplier = new WeakReferenceExpiringSupplier<>(() -> getRegions(server), 5, TimeUnit.MILLISECONDS);
 
@@ -62,8 +62,12 @@ public class FoliaTickStatistics implements TickStatistics {
 
     public void collectMetrics() {
         long time = TimeUtil.monotonicCurrentTimeMillis();
-        this.metrics.tps().record(time, tps10Sec());
-        this.metrics.tickDuration().record(time, new ImmutableDoubleAverageInfo(duration10Sec()));
+        Metrics metrics = this.metrics.get();
+        if (metrics == null) {
+            return;
+        }
+        metrics.tps().record(time, tps10Sec());
+        metrics.tickDuration().record(time, new ImmutableDoubleAverageInfo(duration10Sec()));
     }
 
     @Override

@@ -49,11 +49,11 @@ import java.util.function.Supplier;
  * Provides tick statistics, using the pre Minecraft 26.x API.
  */
 public class FoliaTickStatisticsPre26 implements TickStatistics {
-    private final Metrics metrics;
+    private final Supplier<Metrics> metrics;
     private final Supplier<List<ThreadedRegion<TickRegionData, TickRegionSectionData>>> regionSupplier;
     private final ScheduledFuture<?> metricsTask;
 
-    public FoliaTickStatisticsPre26(Metrics metrics, Server server) {
+    public FoliaTickStatisticsPre26(Supplier<Metrics> metrics, Server server) {
         this.metrics = metrics;
         this.regionSupplier = new WeakReferenceExpiringSupplier<>(() -> getRegions(server), 5, TimeUnit.MILLISECONDS);
 
@@ -65,8 +65,9 @@ public class FoliaTickStatisticsPre26 implements TickStatistics {
 
     public void collectMetrics() {
         long time = TimeUtil.monotonicCurrentTimeMillis();
-        this.metrics.tps().record(time, tps10Sec());
-        this.metrics.tickDuration().record(time, new ImmutableDoubleAverageInfo(duration10Sec()));
+        Metrics metrics = this.metrics.get();
+        metrics.tps().record(time, tps10Sec());
+        metrics.tickDuration().record(time, new ImmutableDoubleAverageInfo(duration10Sec()));
     }
 
     @Override
