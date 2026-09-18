@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import me.lucko.spark.api.Spark;
 import me.lucko.spark.common.SparkPlatform;
 import me.lucko.spark.common.SparkPlugin;
+import me.lucko.spark.common.metric.Metrics;
 import me.lucko.spark.common.monitor.ping.PlayerPingProvider;
 import me.lucko.spark.common.monitor.tick.TickStatistics;
 import me.lucko.spark.common.platform.PlatformInfo;
@@ -132,11 +133,11 @@ public class FoliaSparkPlugin extends JavaPlugin implements SparkPlugin {
     }
 
     @Override
-    public TickStatistics createTickStatistics() {
+    public TickStatistics createTickStatistics(Metrics metrics) {
         if (classExists("ca.spottedleaf.common.time.TickData")) {
-            return new FoliaTickStatistics(this.platform.getMetrics(), getServer());
+            return new FoliaTickStatistics(metrics, getServer());
         }
-        return new FoliaTickStatisticsPre26(this.platform.getMetrics(), getServer());
+        return new FoliaTickStatisticsPre26(metrics, getServer());
     }
 
     @Override

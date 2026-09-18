@@ -31,6 +31,7 @@ import com.hypixel.hytale.server.core.plugin.PluginManager;
 import com.hypixel.hytale.server.core.universe.Universe;
 import me.lucko.spark.common.SparkPlatform;
 import me.lucko.spark.common.SparkPlugin;
+import me.lucko.spark.common.metric.Metrics;
 import me.lucko.spark.common.monitor.ping.PlayerPingProvider;
 import me.lucko.spark.common.monitor.tick.TickStatistics;
 import me.lucko.spark.common.platform.PlatformInfo;
@@ -159,8 +160,8 @@ public class HytaleSparkPlugin extends JavaPlugin implements SparkPlugin {
     }
 
     @Override
-    public TickStatistics createTickStatistics() {
-        return new HytaleTickStatistics(this.platform.getMetrics());
+    public TickStatistics createTickStatistics(Metrics metrics) {
+        return new HytaleTickStatistics(metrics);
     }
 
     @Override
