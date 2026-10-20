@@ -5,7 +5,7 @@
   "Description": "spark is a performance profiling mod for Hytale",
   "Authors": [{"Name": "Luck"}],
   "Website": "https://spark.lucko.me/",
-  "ServerVersion": "${hytaleVersion}",
+  "ServerVersion": "^${hytaleVersion}",
   "Dependencies": {},
   "OptionalDependencies": {},
   "DisabledByDefault": false,
