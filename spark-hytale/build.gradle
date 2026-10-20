@@ -6,7 +6,7 @@ tasks.withType(JavaCompile).configureEach {
     options.release = 21
 }
 
-var hytaleVersion = '0.6.0'
+var hytaleVersion = '0.7.2'
 
 dependencies {
     implementation("me.lucko:spark-common:${project.baseVersion}-SNAPSHOT") {
